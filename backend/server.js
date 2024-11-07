@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
+/* import mongoose from "mongoose"; */
 import nodemailer from "nodemailer";
 import { fileURLToPath } from "url";
 import multer from "multer";
@@ -13,11 +13,11 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Connect to MongoDB Atlas
+/* // Connect to MongoDB Atlas
 mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("Connected Successfully to MongoDB Atlas"))
-  .catch((error) => console.error("MongoDB connection error:", error));
+  .catch((error) => console.error("MongoDB connection error:", error)); */
 
 //middleware
 app.use(express.json());

@@ -4,7 +4,7 @@
   --light-gray: #e9e9e9;
   --mid-gray: #ddd;
   --dark-gray: #595a5c;
-  --mid-blue: #0082c8;
+  --light-purple: #a8c0ff;
 }
 
 body {
@@ -18,6 +18,11 @@ main {
   height: 100%;
 }
 
+section {
+  border-radius: 5px;
+  background-color: var(--white);
+}
+
 .wrapper {
   height: 100vh;
 }
@@ -29,12 +34,12 @@ main {
 }
 
 .navbar {
-  background-color: var(--mid-blue);
+  background-color: var(--black);
 }
 
 .navbar-brand {
   padding-top: 0.75rem;
-  color: var(--black) !important;
+  color: var(--white) !important;
   padding-bottom: 0.75rem;
   box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.25);
 }
@@ -45,41 +50,204 @@ main {
 }
 
 .nav-item a {
-  color: var(--black);
+  color: var(--white) !important;
 }
 
 .nav-item a:hover {
-  color: #fff !important;
+  font-weight: bold;
 }
 
-/*
- * Sidebar
- */
+.user-button button {
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+  text-decoration: none;
+  color: var(--white);
+}
 
-.sidebar {
-  position: fixed;
-  top: 0;
-  /* rtl:raw:
-    right: 0;
-    */
-  bottom: 0;
-  /* rtl:remove */
+.logo-b {
+  color: #00b4db;
+}
+
+.logo-v {
+  color: #3f2b96;
+}
+
+.logo-c {
+  color: #ff0080;
+}
+
+.navbar-brand i {
+  color: #f37335 !important;
+}
+
+/* hero */
+.hero {
+  position: relative;
+}
+
+.hero-content {
+  background-color: rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 25%;
   left: 0;
-  z-index: 100; /* Behind the navbar */
-  padding: 48px 0 0; /* Height of navbar */
-  box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
-  background-color: var(--mid-blue);
+  width: 40%;
+  z-index: 1;
+  padding-left: 2rem;
 }
 
-.sidebar .nav-link {
-  font-weight: 500;
+.hero-image-container img {
+  object-fit: cover;
+  width: 100%;
+  height: auto;
+}
+
+/* main */
+.flight-options {
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+  margin: auto;
+}
+
+.select-trip {
+  padding: 0.2em 0.5em 0.2em 1.5em;
+  background-image: url("../../src/assets/arrow-repeat.svg");
+  background-repeat: no-repeat;
+  background-size: 1em auto;
+  background-position: 0.4em center;
+  border: none;
+  background-color: transparent;
+  text-align: center;
+}
+
+.select-passengers {
+  list-style: none;
+  padding-left: 0;
+  color: var(--black);
+}
+
+.dropdown-menu li {
+  display: flex;
+  border-bottom: 1px solid var(--mid-gray);
+  padding-right: 0.5rem;
+}
+
+.select-passengers li a {
   color: var(--black) !important;
+  text-decoration: none;
 }
 
-.sidebar .nav-link:hover {
-  color: var(--white) !important;
+.dropdown-item span {
+  font-size: 12px;
 }
 
-.sidebar .nav-link.active {
-  color: var(--white) !important;
+.passenger-count {
+  border: none;
+  width: 50%;
+}
+
+.select-passengers button:hover {
+  font-weight: bold;
+}
+
+.select-class {
+  border: none;
+  background-color: transparent;
+}
+
+.btn-swap {
+  border-radius: 20px !important;
+}
+
+.dates .col-5 {
+  width: 45% !important;
+}
+
+.dates .col-2 {
+  width: 10% !important;
+}
+
+.form-actions {
+  width: 25%;
+}
+
+/* Footer */
+
+footer {
+  background-color: var(--black);
+}
+
+.disclaimer {
+  text-align: center;
+  color: var(--white);
+  padding: 1.5rem 0;
+  font-size: 12px;
+}
+
+.social-media-col a {
+  align-items: center;
+  gap: 1rem;
+  width: 70%;
+}
+
+footer ul {
+  padding-left: 0;
+  list-style: none;
+}
+
+footer li {
+  padding-bottom: 0.5rem;
+}
+
+footer li a {
+  text-decoration: none;
+  color: var(--white);
+  font-weight: bold;
+}
+
+footer h3 {
+  color: var(--white);
+  font-weight: bold;
+  font-size: 21px;
+  padding-bottom: 1rem;
+  text-align: center;
+}
+
+/* ------------------ */
+/* Responsive Design */
+/* ------------------ */
+@media screen and (max-width: 576px) {
+}
+
+@media screen and (max-width: 768px) {
+  .nav-item a {
+    font-size: 18px !important;
+  }
+
+  .hero-content {
+    top: 15%;
+    padding-left: 1rem !important;
+  }
+
+  .hero-content h1 {
+    font-size: 22px;
+    padding-bottom: 1rem !important;
+  }
+
+  .flight-options {
+    width: 80%;
+  }
+
+  .form-actions {
+    width: 40% !important;
+  }
+
+  .hero-content p {
+    font-size: 12px;
+  }
+
+  .social-media-col {
+    width: 100% !important;
+  }
 }

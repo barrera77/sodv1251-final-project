@@ -9,15 +9,15 @@
     <script type="module" src="/src/index.js" defer></script>
 
     <!-- jQuery -->
-    <script
-      src="https://code.jquery.com/jquery-3.7.1.min.js"
-      integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.1/jquery-ui.js"></script>
     <!-- Stylesheets -->
     <link rel="stylesheet" type="text/css" href="/css/styles.css" />
     <link rel="stylesheet" type="text/css" href="/css/modern-reset.css" />
-    <link rel="stylesheet" type="text/css" href="/css/calendar-styles.css" />
+    <link
+      rel="stylesheet"
+      href="https://code.jquery.com/ui/1.14.1/themes/base/jquery-ui.css"
+    />
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -56,145 +56,272 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     />
-    <!-- datepicker -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   </head>
   <body>
     <div class="wrapper">
-      <header class="navbar navbar-dark sticky-top flex-md-nowrap p-0 shadow">
-        <a
-          class="navbar-brand fw-bold text-center col-md-3 col-lg-2 me-0 px-3 fs-6"
-          href="#"
-          >BVC Airlines</a
-        >
-        <div class="navbar-nav">
-          <div class="d-flex align-items-center gap-3">
-            <div class="nav-item">
-              <a href="#">
-                <i class="bi bi-gear"></i>
-              </a>
-            </div>
-            <div class="nav-item">
-              <a href="#">
-                <i class="bi bi-translate"></i>
-              </a>
-            </div>
-            <div class="nav-item">
-              <a href="#">
-                <i class="bi bi-bell"></i>
-              </a>
-            </div>
-            <div class="nav-item">
-              <a href="#">
-                <i class="bi bi-person-circle"></i>
-              </a>
-            </div>
-            <div class="nav-item text-nowrap">
-              <a class="nav-link px-3" href="#">Sign out</a>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <div class="container-fluid h-100">
-        <div class="h-100 row">
-          <nav
-            id="sidebarMenu"
-            class="col-md-3 col-lg-2 d-md-block sidebar collapse"
-          >
-            <div class="position-sticky sidebar-sticky">
-              <div>
-                <img
-                  class="logo"
-                  src="../src/assets/umbrella-logo-3.png"
-                  alt="logo"
-                />
+      <header>
+        <div class="navbar-container">
+          <nav class="navbar navbar-expand-md w-100" id="nav-bar">
+            <div class="container container-fluid">
+              <div class="logo-container">
+                <a class="navbar-brand fs-3 fw-bold" href="/"
+                  ><i class="bi bi-airplane"></i> <span class="logo-b">B</span
+                  ><span class="logo-v">V</span
+                  ><span class="logo-c">C</span> Airlines</a
+                >
               </div>
-              <hr />
-              <ul class="nav flex-column">
-                <li class="nav-item">
-                  <a
-                    href="/"
-                    class="nav-link active"
-                    aria-current="page"
-                    data-link
-                  >
-                    <i class="bi bi-house-door"></i>
-                    Home
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/dashboard" class="nav-link link-dark" data-link>
-                    <i class="bi bi-speedometer2"></i>
-                    Dashboard
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/events" class="nav-link link-dark" data-link>
-                    <i class="bi bi-ticket-perforated"></i>
-                    Events
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/schedule" class="nav-link link-dark" data-link>
-                    <i class="bi bi-calendar3"></i>
-                    Schedule/Agenda
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/attendees" class="nav-link link-dark" data-link>
-                    <i class="bi bi-people-fill"></i> Attendees
-                  </a>
-                </li>
-                <li class="nav-item">
-                  <a href="/communication" class="nav-link link-dark" data-link>
-                    <i class="bi bi-chat-right-dots"></i> Communication
-                  </a>
-                </li>
-              </ul>
+              <button
+                class="navbar-toggler"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent"
+                aria-expanded="false"
+                aria-label="Toggle navigation"
+              >
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div
+                class="collapse navbar-collapse mx-4"
+                id="navbarSupportedContent"
+              >
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                  <li class="nav-item">
+                    <a
+                      class="nav-link active fs-5"
+                      aria-current="page"
+                      href="/e-commerce "
+                      >Home</a
+                    >
+                  </li>
+                  <li class="nav-item">
+                    <a class="nav-link active fs-5" href="#">About</a>
+                  </li>
+                  <li class="nav-item dropdown">
+                    <a
+                      class="nav-link active fs-5"
+                      href="#"
+                      aria-expanded="false"
+                    >
+                      Shop
+                    </a>
+                  </li>
+                </ul>
+              </div>
+              <div
+                class="icon-buttons-container d-flex gap-3 align-items-center"
+              >
+                <div class="user-button d-flex gap-3 align-items-center">
+                  <button><i class="fa fa-user" aria-hidden="true"></i></button>
+                  <span class="user-name-label fw-bold"></span>
+                  <button class="d-none btn btn-logout">Log out</button>
+                </div>
+              </div>
             </div>
           </nav>
-
-          <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-            <div
-              class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom"
-            >
-              <h1 class="h2">Ticket Reservation System</h1>
-              <div class="btn-toolbar mb-2 mb-md-0">
-                <div class="btn-group me-2">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-secondary"
-                  >
-                    Share
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-secondary"
-                  >
-                    Export
-                  </button>
+        </div>
+        <section class="hero">
+          <div class="hero-image-container">
+            <img
+              src="../src/assets/hero-img-3.png"
+              alt="airplane"
+              class="img-fuid"
+            />
+          </div>
+          <div class="hero-content py-3">
+            <h1 class="fw-bold pb-4">
+              With <span class="logo-b">B</span><span class="logo-v">V</span
+              ><span class="logo-c">C</span> Airlines <br />
+              The Sky's Not the Limit!
+            </h1>
+            <p class="fw-bold">
+              Elevate your journey. Indulge in unparalleled luxury <br />
+              and comfort as you soar above the clouds with us.
+            </p>
+          </div>
+        </section>
+        <main class="py-4">
+          <section
+            class="shadow container py-5 m-auto border border-secondary-subttle"
+          >
+            <h2 class="text-center pb-3">Flights</h2>
+            <form>
+              <div class="flight-options d-flex gap-3">
+                <div class="pb-4">
+                  <select name="trip-type" id="trip-type" class="select-trip">
+                    <option value="Round Trip" selected>Round Trip</option>
+                    <option value="One Way">One Way</option>
+                    <option value="Multi-city">Multi-city</option>
+                  </select>
                 </div>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-secondary dropdown-toggle"
-                >
-                  <span
-                    data-feather="calendar"
-                    class="align-text-bottom"
-                  ></span>
-                  This week
+
+                <div>
+                  <ul class="select-passengers ms-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                      <i class="bi bi-person-circle me-2"></i>
+                      <a
+                        class="fs-5 dropdown-toggle"
+                        href="#"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                      >
+                        <span>1</span>
+                      </a>
+
+                      <ul class="dropdown-menu">
+                        <li>
+                          <a class="dropdown-item" href="/menu-food">Adults</a>
+                          <input type="number" class="passenger-count" />
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="#"
+                            >Children <br /><span>Age 2-11</span></a
+                          >
+                          <input type="number" class="passenger-count" />
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="#"
+                            >Infants <br /><span>In Seat</span></a
+                          >
+                          <input type="number" class="passenger-count" />
+                        </li>
+                        <li>
+                          <a class="dropdown-item" href="#"
+                            >Infants <br /><span>On lap</span></a
+                          >
+                          <input type="number" class="passenger-count" />
+                        </li>
+                        <li>
+                          <div class="p-2 w-100 d-flex justify-content-between">
+                            <button class="btn btn-cancel">Cancel</button>
+                            <button class="btn btn-done">Done</button>
+                          </div>
+                        </li>
+                      </ul>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <select
+                    name="flight-class"
+                    id="flight-class"
+                    class="select-class"
+                  >
+                    <option value="Economy" selected>Economy</option>
+                    <option value="Premium Economy" selected>
+                      Premium Economy
+                    </option>
+                    <option value="Business" selected>Business</option>
+                    <option value="First" selected>First</option>
+                  </select>
+                </div>
+              </div>
+              <div class="search-form-container form-group row">
+                <div class="search col-lg-7 col-sm-12 pb-3">
+                  <div class="row">
+                    <div class="col-5">
+                      <input
+                        class="form-control"
+                        type="text"
+                        placeholder="Where from?"
+                        id="where-from"
+                      />
+                    </div>
+                    <div class="col-2 text-center">
+                      <button class="btn btn-outline-dark w-100 btn-swap">
+                        <i class="bi bi-arrow-left-right"></i>
+                      </button>
+                    </div>
+                    <div class="col-5">
+                      <input
+                        class="form-control"
+                        type="text"
+                        placeholder="Destination"
+                        id="destination"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-lg-5 col-sm-12 pb-3">
+                  <div class="row dates">
+                    <div class="col-5">
+                      <input
+                        class="form-control datePicker"
+                        type="text"
+                        placeholder="Departure"
+                      />
+                    </div>
+                    <div class="col-2 text-center">
+                      <span class="fs-3"
+                        ><i class="bi bi-calendar4-week"></i
+                      ></span>
+                    </div>
+                    <div class="col-5">
+                      <input
+                        class="form-control datePicker"
+                        type="text"
+                        placeholder="Return"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="form-actions pt-4 m-auto d-flex justify-content-between"
+              >
+                <button class="btn btn-dark px-3">
+                  <i class="bi bi-search"></i> Search
+                </button>
+                <button class="btn btn-dark btn-clear px-3">
+                  <i class="bi bi-recycle"></i> Clear
                 </button>
               </div>
+            </form>
+          </section>
+        </main>
+        <footer>
+          <div class="footer-container">
+            <div class="row container m-auto pt-4 pb-0">
+              <div class="footer-content-col social-media-col m-auto">
+                <h3>Follow us</h3>
+                <ul class="d-flex gap-3 justify-content-center">
+                  <li>
+                    <a href="https://www.youtube.com/" target="_blank"
+                      ><i class="bi bi-youtube"></i> YouTube</a
+                    >
+                  </li>
+                  <li>
+                    <a href="https://www.facebook.com/" target="_blank">
+                      <i class="bi bi-facebook"></i> Facebook</a
+                    >
+                  </li>
+                  <li>
+                    <a href="https://www.instagram.com/" target="_blank"
+                      ><i class="bi bi-instagram"></i> Instagram</a
+                    >
+                  </li>
+                  <li>
+                    <a href="https://www.linkedin.com/" target="_blank"
+                      ><i class="bi bi-linkedin"></i> LinkedIn</a
+                    >
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div class="app"></div>
-          </main>
-        </div>
-      </div>
+
+            <div class="disclaimer container">
+              <p>&copy; 2024 Manuel Alva.</p>
+              <p>
+                This website was created for academic purposes only. Any
+                resemblance to other website or businesses, real or fictional,
+                is purely coincidential
+              </p>
+            </div>
+          </div>
+        </footer>
+      </header>
     </div>
   </body>
 </html>
