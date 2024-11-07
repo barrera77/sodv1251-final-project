@@ -5,9 +5,12 @@ import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import { fileURLToPath } from "url";
 import multer from "multer";
+import flightsRouter from "./routes/Flights-Router.js";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
+app.use(cors());
 
 // Get the current directory
 const __filename = fileURLToPath(import.meta.url);
@@ -22,6 +25,9 @@ mongoose
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+//serve DB data
+app.use("/", flightsRouter);
 
 // Serve static assets in production mode
 if (process.env.NODE_ENV === "production") {
