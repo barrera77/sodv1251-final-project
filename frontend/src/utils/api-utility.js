@@ -1,9 +1,9 @@
-const BASE_URL = "https://serpapi.com/search";
+const BASE_URL = "http://localhost:5001";
 
 //GET request
 export async function getData(endpoint) {
   try {
-    const response = await fetch(`${BASE_URL}${endpoint}`);
+    const response = await fetch(endpoint);
 
     if (!response.ok) {
       throw new Error("Data not found");

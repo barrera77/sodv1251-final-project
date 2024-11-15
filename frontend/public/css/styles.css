@@ -23,6 +23,10 @@ section {
   background-color: var(--white);
 }
 
+.flex-1 {
+  flex: 1;
+}
+
 .main-wrapper {
   height: 100%;
   display: flex;
@@ -106,7 +110,7 @@ section {
   margin: auto;
 }
 
-.select-trip {
+.select-flight {
   padding: 0.2em 0.5em 0.2em 1.5em;
   background-image: url("../../src/assets/arrow-repeat.svg");
   background-repeat: no-repeat;
@@ -114,7 +118,6 @@ section {
   background-position: 0.4em center;
   border: none;
   background-color: transparent;
-  text-align: center;
 }
 
 .select-passengers {
@@ -166,6 +169,85 @@ section {
 
 .form-actions {
   width: 25%;
+}
+
+#where-from {
+  position: relative;
+}
+
+.suggestions-dropdown {
+  position: absolute;
+  background-color: white;
+  border: 1px solid #ccc;
+  width: 300px;
+  max-height: 150px;
+  overflow-y: scroll;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 1000;
+}
+
+/* Search results */
+.cards-wrapper {
+  border-radius: 5px;
+}
+
+.btn-select-flight {
+  font-size: 25px !important;
+  color: green !important;
+}
+
+.btn-select-flight:hover {
+  color: var(--black) !important;
+}
+
+.subdata {
+  font-size: 12px;
+}
+
+.btn-search,
+.btn-reset {
+  width: 50%;
+}
+
+.alert-info {
+  border-left: solid 5px blue !important;
+  border-radius: unset !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+.flight-booking section {
+  background-color: transparent;
+}
+
+.btn-revise:hover {
+  text-decoration: underline;
+}
+
+.flight-summary-section {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding-top: 1rem;
+}
+
+.country-codes {
+  width: max-content;
+}
+
+.select-dial-code {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  padding-right: 40px !important;
+  width: 45%;
+}
+
+#phone-number-input {
+  width: 55%;
 }
 
 /* Footer */

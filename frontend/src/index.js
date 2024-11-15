@@ -1,4 +1,5 @@
 import Home from "./components/Home.js";
+import Bookings from "./components/Bookings.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -27,6 +28,10 @@ const router = async () => {
     {
       path: "/",
       view: Home,
+    },
+    {
+      path: "/booking-form",
+      view: Bookings,
     },
   ];
 
@@ -58,8 +63,8 @@ const router = async () => {
   }
 
   // Now that the HTML is rendered, you can bind event listeners
-  if (typeof view.manageState === "function") {
-    view.manageState();
+  if (typeof view.postRender === "function") {
+    view.postRender();
   }
 };
 

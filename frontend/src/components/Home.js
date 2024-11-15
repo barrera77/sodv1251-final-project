@@ -1,159 +1,557 @@
 import AbstractView from "./AbstractView.js";
 import Hero from "./Hero.js";
-import SearchForm from "./SearchForm.js";
-import FlightCard from "../templates/FlightCard.js";
+import SearchForm from "../templates/search-form.js";
 import { getData } from "../utils/api-utility.js";
-
-const FLIGHTS_END_POINT = "/";
+import FlightCard from "../templates/flight-card.js";
+import BookingOptionsCard from "../templates/booking-options-card.js";
+import SelectedFlightCard from "../templates/selected-flights-card.js";
 
 export default class extends AbstractView {
   constructor(params) {
     super(params);
     this.setTitle("Home");
+    this.autocompleteTimeout = 300;
+    this.autocompleteTimeoutHandle = 0;
+    this.domElements = {};
   }
 
   async getHtml() {
-    this.manageState();
-
     return `
-      <div class="html-container">
-      ${Hero}
-      ${SearchForm}
-
-     
-      <div class="search-results-container">
+          
+          <div class="html-container">
+            ${Hero} 
+            ${SearchForm}   
             
-      </div>
-      
-    
-    
-    
-    `;
+  
+          </div>
+         
+          
+        `;
   }
 
-  manageState() {
-    /**
-     * trigger initial logic when DOM is loaded
-     */
+  async postRender() {
+    this.initializeElements();
+    const {
+      originInput,
+      originOptions,
+      destinationInput,
+      destinationOptions,
+      departureDateInput,
+      flightTypeSelect,
+      returnDate,
+      searchButton,
+      resetButton,
+      selectFlightButtons,
+      searchResultsSeparator,
+      searchResultsLoader,
+      searchResults,
+      returnDateInput,
+      travelClassSelect,
+      adultsInput,
+      childrenInput,
+      infantsInput,
+      flightIcon,
+    } = this.domElements;
 
-    this.createDatePicker();
-    this.handleSelectTrip();
+    this.reset();
 
-    const btnClear = document.querySelector(".btn-clear");
+    document.body.addEventListener("change", () => {
+      clearTimeout(this.autocompleteTimeoutHandle);
+      searchButton.disabled = !originInput.value || !destinationInput.value;
+    });
 
-    if (btnClear) {
-      btnClear.addEventListener("click", this.handleBtnClear);
-    }
+    originInput.addEventListener("input", () => {
+      this.autocomplete(originInput, originOptions);
+    });
+    destinationInput.addEventListener("input", () => {
+      this.autocomplete(destinationInput, destinationOptions);
+    });
+    flightTypeSelect.addEventListener("change", () => {
+      if (flightTypeSelect.value === "one-way") {
+        returnDate.classList.add("d-none");
+        flightIcon.classList.remove("bi-arrow-repeat");
+        flightIcon.classList.add("bi-arrow-right");
+      } else {
+        returnDate.classList.remove("d-none");
+        flightIcon.classList.remove("bi-arrow-right");
+        flightIcon.classList.add("bi-arrow-repeat");
+      }
+    });
+    searchButton.addEventListener("click", async () => {
+      searchResultsSeparator.classList.remove("d-none");
+      searchResultsLoader.classList.remove("d-none");
 
-    const btnSearch = document.querySelector(".btn-search");
+      const results = await this.search();
 
-    if (btnSearch) {
-      btnSearch.addEventListener("click", this.handleBtnSearch);
+      searchResultsLoader.classList.add("d-none");
+      this.showResults(results);
+    });
+
+    resetButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.reset();
+    });
+  }
+
+  /**
+   * Initialize DOM elements
+   */
+  initializeElements() {
+    this.domElements = {
+      originInput: document.getElementById("origin-input"),
+      originOptions: document.getElementById("origin-options"),
+      destinationInput: document.getElementById("destination-input"),
+      destinationOptions: document.getElementById("destination-options"),
+      departureDateInput: document.getElementById("departure-date-input"),
+      flightTypeSelect: document.getElementById("flight-type-select"),
+      returnDate: document.getElementById("return-date"),
+      searchButton: document.getElementById("search-button"),
+      resetButton: document.querySelector(".btn-reset"),
+      selectFlightButtons: document.querySelectorAll(".btn-select-flight"),
+      bookFlightButtons: document.querySelectorAll(".btn-book-flight"),
+      searchResultsSeparator: document.getElementById(
+        "search-results-separator"
+      ),
+      searchResultsLoader: document.getElementById("search-results-loader"),
+      bestFlights: document.getElementById("best-flights"),
+      otherFlights: document.getElementById("other-flights"),
+      returnDateInput: document.getElementById("return-date-input"),
+      travelClassSelect: document.getElementById("travel-class-select"),
+      adultsInput: document.getElementById("adults-input"),
+      childrenInput: document.getElementById("children-input"),
+      infantsInput: document.getElementById("infants-input"),
+      flightIcon: document.querySelector(".flight-icon"),
+    };
+  }
+
+  reset() {
+    const {
+      originInput,
+      destinationInput,
+      departureDateInput,
+      flightTypeSelect,
+      returnDate,
+      searchButton,
+      searchResultsSeparator,
+      searchResultsLoader,
+      returnDateInput,
+      travelClassSelect,
+      adultsInput,
+      childrenInput,
+      infantsInput,
+      flightIcon,
+    } = this.domElements;
+
+    originInput.value = "";
+    destinationInput.value = "";
+    departureDateInput.valueAsDate = new Date();
+    returnDateInput.valueAsDate = new Date();
+    returnDate.classList.add("d-none");
+    travelClassSelect.value = "1";
+    adultsInput.value = 1;
+    childrenInput.value = 0;
+    infantsInput.value = 0;
+    searchButton.disabled = true;
+    searchResultsSeparator.classList.add("d-none");
+    searchResultsLoader.classList.add("d-none");
+    flightTypeSelect.value = "one-way";
+    flightIcon.classList.add("bi-arrow-right");
+  }
+
+  /**
+   * format dates
+   * @param {*} date
+   * @returns
+   */
+  formatDate(date) {
+    const [formattedDate] = date.toISOString().split("T");
+    return formattedDate;
+  }
+
+  /**
+   * format numeric values
+   * @param {*} number
+   * @returns
+   */
+  formatNumber(number) {
+    return `${Math.abs(parseInt(number))}`;
+  }
+
+  /**
+   * handle logic for the autocomplete feature for the input elements
+   * @param {*} input
+   * @param {*} datalist
+   * @param {*} cityCodes
+   */
+  autocomplete(input, datalist) {
+    clearTimeout(this.autocompleteTimeoutHandle);
+    this.autocompleteTimeoutHandle = setTimeout(async () => {
+      try {
+        const data = await getData(
+          "https://raw.githubusercontent.com/algolia/datasets/master/airports/airports.json"
+        );
+
+        // get data
+        let matches = data.filter((airport) => {
+          const regex = new RegExp(`^${input}`, "gi");
+          return (
+            airport.country.match(regex) ||
+            airport.name.match(regex) ||
+            airport.city.match(regex) ||
+            airport.iata_code.match(regex)
+          );
+        });
+        datalist.textContent = "";
+        matches.forEach((entry) => {
+          datalist.insertAdjacentHTML(
+            "beforeend",
+            `<option value="${entry.iata_code}">${entry.city} - ${entry.iata_code}</option>`
+          );
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }, this.autocompleteTimeout);
+  }
+
+  /**
+   *
+   * @returns Search fro flights based on user input criteria
+   */
+  async search() {
+    const {
+      originInput,
+      destinationInput,
+      departureDateInput,
+      flightTypeSelect,
+      returnDateInput,
+      travelClassSelect,
+      adultsInput,
+      childrenInput,
+      infantsInput,
+    } = this.domElements;
+    try {
+      const returns = flightTypeSelect.value === "round-trip";
+      const params = new URLSearchParams({
+        departure_id: originInput.value,
+        arrival_id: destinationInput.value,
+        outbound_date: this.formatDate(departureDateInput.valueAsDate),
+        departure_token: "",
+        adults: this.formatNumber(adultsInput.value),
+        children: this.formatNumber(childrenInput.value),
+        infants_in_seat: this.formatNumber(infantsInput.value),
+        travel_class: this.formatNumber(travelClassSelect.value),
+        ...(returns
+          ? { return_date: this.formatDate(returnDateInput.valueAsDate) }
+          : {}),
+        currency: "CAD",
+        hl: "en",
+      });
+      const query = `search?${params.toString()}`;
+
+      const data = await getData(query);
+      return data;
+    } catch (error) {
+      console.error(error);
     }
   }
 
-  createDatePicker() {
-    const dateSelectors = document.querySelectorAll(".datePicker");
+  /**
+   * Render the search results
+   * @param {*} results
+   */
+  showResults(results) {
+    const { bestFlights, otherFlights } = this.domElements;
+    const bestFlightsList = results.best_flights || [];
+    const otherFlightsList = results.other_flights || [];
 
-    if (dateSelectors) {
-      dateSelectors.forEach((selector) => {
-        $(selector).datepicker({ showButtonPanel: true, numberOfMonths: 2 });
-        $(selector).datepicker("option", "dateFormat", "DD, d MM");
-        $(selector).datepicker("option", "showAnim", "blind");
+    if (bestFlightsList.length === 0) {
+      // Clear any existing content and add "No results" message
+      bestFlights.textContent = ""; // Ensures it's empty
+      bestFlights.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="d-flex justify-content-center align-items-center" id="search-no-results">
+            No results
+        </div>
+        `
+      );
+    } else {
+      // Clear any existing content
+      bestFlights.textContent = "";
+      bestFlights.innerHTML = `<h3 class="text-center py-3">Best Flights</h3>`;
+
+      bestFlightsList.forEach((flight) => {
+        bestFlights.innerHTML += `
+          <div class="flex-column flex-sm-row list-group-item d-flex justify-content-between align-items-sm-center">
+          ${FlightCard(results, flight)}
+          </div>
+            `;
+      });
+    }
+
+    if (otherFlightsList.length === 0) {
+      // Clear any existing content and add "No results" message
+      otherFlights.textContent = ""; // Ensures it's empty
+      otherFlights.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="d-flex justify-content-center align-items-center" id="search-no-results">
+            No results
+        </div>
+        `
+      );
+    } else {
+      // Clear any existing content
+      otherFlights.textContent = "";
+      otherFlights.innerHTML = `<h3 class="text-center py-3">Other Flights</h3>`;
+
+      otherFlightsList.forEach((flight) => {
+        otherFlights.innerHTML += `
+        <div class="flex-column flex-sm-row list-group-item d-flex justify-content-between align-items-sm-center">
+        ${FlightCard(results, flight)}
+        </div>
+          `;
+      });
+    }
+
+    this.getReturnFlights();
+  }
+
+  getReturnFlights() {
+    this.domElements.selectFlightButtons =
+      document.querySelectorAll(".btn-select-flight");
+
+    if (this.domElements.selectFlightButtons.length > 0) {
+      this.domElements.selectFlightButtons.forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          const token = event.target.getAttribute("data-token");
+          const departure_id = event.target.getAttribute("data-departure_id");
+          const arrival_id = event.target.getAttribute("data-arrival_id");
+          const outbound_date = event.target.getAttribute("data-outbound_date");
+          const return_date = event.target.getAttribute("data-return_date");
+          const numOfAdults = event.target.getAttribute("data-adults");
+          const numOfChildren = event.target.getAttribute("data-children");
+          const numOfInfants = event.target.getAttribute("data-infants");
+
+          const params = new URLSearchParams({
+            engine: "google_flights",
+            departure_id: departure_id,
+            arrival_id: arrival_id,
+            outbound_date: outbound_date,
+            return_date: return_date,
+            adults: numOfAdults,
+            children: numOfChildren,
+            infants_in_seat: numOfInfants || 0,
+            departure_token: token,
+            currency: "CAD",
+            hl: "en",
+          });
+          this.domElements.searchResultsLoader.classList.remove("d-none");
+
+          const query = `/search?${params.toString()}`;
+
+          try {
+            const response = await fetch(query);
+
+            if (!response.ok) {
+              throw new Error("Data not found");
+            }
+
+            this.domElements.searchResultsLoader.classList.add("d-none");
+
+            const data = await response.json();
+            this.showReturnResults(data);
+          } catch (error) {
+            throw error;
+          }
+        });
       });
     }
   }
 
-  handleSelectTrip() {
-    const selectTrip = document.querySelector(".select-trip");
-    if (selectTrip) {
-      selectTrip.addEventListener("change", this.handleSelectTrip);
+  showReturnResults(results) {
+    const { bestFlights, otherFlights } = this.domElements;
+    const bestFlightsList = results.best_flights || [];
+    const otherFlightsList = results.other_flights || [];
 
-      const selectedTripType = selectTrip.value;
+    if (bestFlightsList.length === 0) {
+      // Clear any existing content and add "No results" message
+      bestFlights.innerHTML = "";
+      /* bestFlights.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="d-flex justify-content-center align-items-center" id="search-no-results">
+            No results
+        </div>
+        `
+      ); */
+    } else {
+      // Clear any existing content
+      bestFlights.innerHTML = "";
+      bestFlights.innerHTML = `<h3 class="text-center py-3">Best Return Flights</h3>`;
 
-      switch (selectedTripType) {
-        case "Round Trip":
-          selectTrip.style.backgroundImage =
-            "url(../../src/assets/arrow-repeat.svg)";
-          break;
+      bestFlightsList.forEach((flight) => {
+        bestFlights.innerHTML += `
+          <div class="flex-column flex-sm-row list-group-item d-flex justify-content-between align-items-sm-center">
+          ${FlightCard(results, flight)}
+          </div>
+            `;
+      });
+    }
 
-        case "One Way":
-          selectTrip.style.backgroundImage =
-            "url(../../src/assets/arrow-left.svg)";
-          break;
+    if (otherFlightsList.length === 0) {
+      // Clear any existing content and add "No results" message
+      otherFlights.innerHTML = ""; // Ensures it's empty
+      otherFlights.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="d-flex justify-content-center align-items-center" id="search-no-results">
+            No results
+        </div>
+        `
+      );
+    } else {
+      // Clear any existing content
+      otherFlights.innerHTML = "";
+      otherFlights.innerHTML = `<h3 class="text-center py-3">Other Return Flights</h3>`;
 
-        case "Multi-city":
-          selectTrip.style.backgroundImage =
-            "url(../../src/assets/arrows-move.svg)";
-          break;
-      }
+      otherFlightsList.forEach((flight) => {
+        otherFlights.innerHTML += `
+        <div class="flex-column flex-sm-row list-group-item d-flex justify-content-between align-items-sm-center">
+        ${FlightCard(results, flight)}
+        </div>
+          `;
+      });
+    }
+
+    this.getBookingOptions();
+  }
+
+  getBookingOptions() {
+    this.domElements.selectFlightButtons =
+      document.querySelectorAll(".btn-select-flight");
+
+    if (this.domElements.selectFlightButtons.length > 0) {
+      this.domElements.selectFlightButtons.forEach((button) => {
+        button.addEventListener("click", async (event) => {
+          const token = event.target.getAttribute("data-token");
+          const departure_id = event.target.getAttribute("data-departure_id");
+          const arrival_id = event.target.getAttribute("data-arrival_id");
+          const outbound_date = event.target.getAttribute("data-outbound_date");
+          const return_date = event.target.getAttribute("data-return_date");
+          const numOfAdults = event.target.getAttribute("data-adults");
+          const numOfChildren = event.target.getAttribute("data-children");
+          const numOfInfants = event.target.getAttribute("data-infants");
+
+          const params = {
+            engine: "google_flights",
+            departure_id: departure_id,
+            arrival_id: arrival_id,
+            outbound_date: outbound_date,
+            return_date: return_date,
+            booking_token: token,
+            adults: numOfAdults,
+            children: numOfChildren,
+            infants_in_seat: numOfInfants || 0,
+            currency: "CAD",
+            hl: "en",
+          };
+
+          const urlParams = new URLSearchParams(params);
+
+          const query = `/search?${urlParams.toString()}`;
+
+          this.domElements.searchResultsLoader.classList.remove("d-none");
+
+          try {
+            const response = await fetch(query);
+
+            if (!response.ok) {
+              throw new Error("Data not found");
+            }
+
+            const data = await response.json();
+
+            this.domElements.searchResultsLoader.classList.add("d-none");
+
+            this.showBookingOptions(data, params);
+          } catch (error) {
+            throw error;
+          }
+        });
+      });
     }
   }
 
-  /**
-   * callback function for the clear button click event
-   * @param {*} event
-   */
-  handleBtnClear(event) {
-    event.preventDefault();
+  showBookingOptions(results, params) {
+    const { bestFlights, otherFlights } = this.domElements;
+    const bookingOptions = results.booking_options || [];
+    const selectedFlights = results.selected_flights || [];
 
-    //clear inputs
-    document.querySelectorAll(".form-group input").forEach((input) => {
-      input.value = "";
-    });
-
-    document.querySelectorAll(".flight-options select").forEach((select) => {
-      select.selectedIndex = 0;
-    });
-
-    console.log("click");
-  }
-
-  /**
-   * fetch the flight results from the server
-   * @returns flights array
-   */
-  async fetchFlights() {
-    try {
-      const flights = await getData(FLIGHTS_END_POINT);
-      console.table(flights);
-      return flights;
-    } catch (error) {
-      console.error("Error fetching schedule:", error);
-    }
-  }
-
-  async handleBtnSearch(event) {
-    event.preventDefault();
-    console.log("click, click");
-
-    try {
-      const flights = await getData(FLIGHTS_END_POINT);
-      console.table(flights);
-      return flights;
-    } catch (error) {
-      console.error("Error fetching flights:", error);
-    }
-
-    const hero = document.querySelector(".hero");
-    const searchResultsContainer = document.querySelector(
-      ".search-results-container "
-    );
-
-    if (hero) {
-      hero.style.display = "none";
-    }
-
-    if (searchResultsContainer) {
-      searchResultsContainer.innerHTML = `
-
-      <section
-          class="shadow container py-4 m my-4 m-auto border border-secondary-subttle"
-        >
-        ${FlightCard}
-        </section>  
-      
+    if (selectedFlights.length < 0) {
+      // Clear any existing content and add "No results" message
+      bestFlights.innerHTML = "";
+      bestFlights.innerHTML = `
+       <div class="d-flex justify-content-center align-items-center" id="search-no-results">
+            No results
+        </div>
       `;
+    } else {
+      // Clear any existing content
+      bestFlights.innerHTML = "";
+      bestFlights.innerHTML = `<h3 class="text-center py-3">Selected Flights</h3>`;
+
+      selectedFlights.forEach((flight) => {
+        bestFlights.innerHTML += `
+         <div class="flex-column flex-sm-row list-group-item d-flex justify-content-between align-items-sm-center">
+          ${SelectedFlightCard(results, flight)}
+          </div>
+        `;
+      });
+    }
+
+    if (bookingOptions.length > 0) {
+      otherFlights.innerHTML = "";
+      otherFlights.innerHTML = `<h3 class="text-center py-3">Booking Options</h3>`;
+
+      bookingOptions.forEach((option) => {
+        otherFlights.innerHTML += `
+        <div class="flex-column flex-sm-row list-group-item d-flex justify-content-between align-items-sm-center">
+        ${BookingOptionsCard(option)}
+        </div>
+          `;
+      });
+    }
+    this.chooseBookingOption(params, selectedFlights);
+  }
+
+  chooseBookingOption(params, selectedFlights) {
+    const bookFlightButtons = document.querySelectorAll(".btn-book-flight");
+
+    if (bookFlightButtons.length > 0) {
+      bookFlightButtons.forEach((button) => {
+        button.addEventListener("click", (event) => {
+          let bookingOption = event.target.getAttribute("data-book-with");
+          let price = event.target.getAttribute("data-price");
+
+          //store the data in the localstorage
+          localStorage.removeItem("booking-data");
+          localStorage.setItem("booking-data", JSON.stringify(params));
+
+          localStorage.removeItem("selected-flights-data");
+          localStorage.setItem(
+            "selected-flights-data",
+            JSON.stringify(selectedFlights)
+          );
+
+          localStorage.removeItem("booking-option-data");
+          localStorage.setItem(
+            "booking-option-data",
+            JSON.stringify({ bookingOption, price })
+          );
+        });
+      });
     }
   }
 }
