@@ -1,10 +1,12 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
-/* import mongoose from "mongoose"; */
+import mssql from "mssql";
 import { fileURLToPath } from "url";
 import { getJson, config } from "serpapi";
 import cors from "cors";
+import { Connection, Request, TYPES } from "tedious";
+import url from "url";
 
 dotenv.config();
 const app = express();
@@ -80,10 +82,71 @@ mongoose
   .then(() => console.log("Connected Successfully to MongoDB Atlas"))
   .catch((error) => console.error("MongoDB connection error:", error)); */
 
-//middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-//app.use("/api/countries", countriesRouter);
+//create configuration for MSSQL
+const configMssql = {
+  user: process.env.MSSQL_USER_NAME,
+  password: process.env.MSSQL_PASSWORD,
+  database: "AdventureWorks2022",
+  server: "localhost",
+  options: {
+    encrypt: false,
+    trustedconnection: true,
+    enableArithAbort: true,
+  },
+};
+
+const poolPromise = mssql.connect(configMssql);
+
+app.get("/query", async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .query("SELECT * FROM HumanResources.Department");
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching records:", err);
+    res
+      .status(500)
+      .json({ message: "Error fetching records", error: err.message });
+  }
+});
+
+app.post("/query", async (req, res) => {
+  try {
+    const query = req.body.query; // Expect a single query string
+    if (!query || typeof query !== "string") {
+      return res
+        .status(400)
+        .json({ message: "Invalid query format. Must be a string." });
+    }
+
+    const pool = await poolPromise;
+    const result = await pool.request().query(query);
+
+    res.json(result.recordset); // Send the result as JSON
+  } catch (err) {
+    console.error("Error executing query:", err);
+    res
+      .status(500)
+      .json({ message: "Error executing query", error: err.message });
+  }
+});
+
+//Crete conection and test
+/* (async function () {
+  try {
+    console.log("sql connecting......");
+    let pool = await mssql.connect(configMssql);
+    let result = await pool
+      .request()
+      .query("select * from HumanResources.Department"); // subject is my database table name
+
+    console.log(result);
+  } catch (err) {
+    console.log(err);
+  }
+})(); */
 
 // Serve static assets in production mode
 if (process.env.NODE_ENV === "production") {
