@@ -20,12 +20,14 @@ export default class extends AbstractView {
           
           <div class="html-container">
             ${Hero} 
-            ${SearchForm}   
-            
-  
+            ${SearchForm} 
           </div>
-         
+
+          <div class="query-form">
+
+          <button class="btn btn-outline-success btn-send-query">Send Query</button>
           
+          </div>
         `;
   }
 
@@ -109,6 +111,7 @@ export default class extends AbstractView {
       resetButton: document.querySelector(".btn-reset"),
       selectFlightButtons: document.querySelectorAll(".btn-select-flight"),
       bookFlightButtons: document.querySelectorAll(".btn-book-flight"),
+      sendQueryButton: document.querySelector(".btn-send-query"),
       searchResultsSeparator: document.getElementById(
         "search-results-separator"
       ),

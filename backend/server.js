@@ -76,12 +76,6 @@ app.get("/search?", async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* // Connect to MongoDB Atlas
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log("Connected Successfully to MongoDB Atlas"))
-  .catch((error) => console.error("MongoDB connection error:", error)); */
-
 //create configuration for MSSQL
 const configMssql = {
   user: process.env.MSSQL_USER_NAME,
@@ -96,7 +90,7 @@ const configMssql = {
 };
 
 const poolPromise = mssql.connect(configMssql);
-
+/* 
 app.get("/query", async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -131,22 +125,59 @@ app.post("/query", async (req, res) => {
       .status(500)
       .json({ message: "Error executing query", error: err.message });
   }
+}); */
+
+/* REST API */
+// Fetch data from tables
+app.get("/query/:table", async (req, res) => {
+  const { table } = req.params;
+
+  // whitelist tables
+  const validTables = ["Contact", "Baggage", "Flight", "Passenger", "Booking"];
+  if (!validTables.includes(table)) {
+    return res.status(400).json({ message: "Invalid table name." });
+  }
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`SELECT * FROM ${table}`);
+    res.json(result.recordset);
+  } catch (err) {
+    console.error("Error fetching records:", err);
+    res
+      .status(500)
+      .json({ message: "Error fetching records", error: err.message });
+  }
 });
 
-//Crete conection and test
-/* (async function () {
-  try {
-    console.log("sql connecting......");
-    let pool = await mssql.connect(configMssql);
-    let result = await pool
-      .request()
-      .query("select * from HumanResources.Department"); // subject is my database table name
+// Insert data into tables
+app.post("/query/:table", async (req, res) => {
+  const { table } = req.params;
+  const { data } = req.body;
 
-    console.log(result);
-  } catch (err) {
-    console.log(err);
+  //Validate table name (consider using a whitelist for security)
+  const validTables = ["Contact", "Baggage", "Flight", "Passenger", "Booking"];
+  if (!validTables.includes(table)) {
+    return res.status(400).json({ message: "Invalid table name." });
   }
-})(); */
+
+  // Generate columns and values strings for the SQL query
+  const columns = Object.keys(data).join(", ");
+  const values = Object.values(data)
+    .map((value) => `'${value}'`)
+    .join(", ");
+  try {
+    const pool = await poolPromise;
+    await pool
+      .request()
+      .query(`INSERT INTO ${table} (${columns}) VALUES (${values})`);
+    res.status(200).json({ message: "Record inserted successfully." });
+  } catch (err) {
+    console.error("Error inserting record:", err);
+    res
+      .status(500)
+      .json({ message: "Error inserting record", error: err.message });
+  }
+});
 
 // Serve static assets in production mode
 if (process.env.NODE_ENV === "production") {
