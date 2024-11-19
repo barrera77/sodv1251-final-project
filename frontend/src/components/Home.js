@@ -32,6 +32,7 @@ export default class extends AbstractView {
   }
 
   async postRender() {
+    this.handleFormData();
     this.initializeElements();
     const {
       originInput,
@@ -556,5 +557,138 @@ export default class extends AbstractView {
         });
       });
     }
+  }
+
+  handleFormData() {
+    this.domElements.sendQueryButton =
+      document.querySelector(".btn-send-query");
+
+    this.domElements.sendQueryButton.addEventListener(
+      "click",
+      async (event) => {
+        event.preventDefault();
+
+        try {
+          // Insert Booking
+          const bookingData = {
+            Price: 200.0,
+            NumberOfPassengers: 3,
+            DepartureDate: "2024-12-01",
+            BookingOption: "Sample Airline",
+            ArrivalDate: "2024-12-02",
+          };
+
+          const bookingResponse = await fetch("/query/Booking", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: bookingData }),
+          });
+
+          if (!bookingResponse.ok) throw new Error("Failed to insert booking");
+
+          const bookingResult = await bookingResponse.json();
+          console.log("Booking inserted successfully:", bookingResult);
+
+          const bookingID = bookingResult.BookingID;
+          if (!bookingID) throw new Error("BookingID not returned");
+
+          //Insert Passenger
+          const passengerData = {
+            BookingID: bookingID,
+            FirstName: "John",
+            LastName: "Doe",
+            CountryID: 1,
+            Gender: "F",
+            DateOfBirth: "1977-12-02",
+            IsRegistered: 1,
+            RegisteredOn: "2000-11-22",
+          };
+
+          const passengerResponse = await fetch("/query/Passenger", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: passengerData }),
+          });
+
+          if (!passengerResponse.ok)
+            throw new Error("Failed to insert passenger");
+
+          const passengerResult = await passengerResponse.json();
+          console.log("Passenger inserted successfully:", passengerResult);
+
+          const passengerID = passengerResult.PassengerID;
+          if (!passengerID) throw new Error("PassengerID not returned");
+
+          // Insert Flight
+          const flightData = {
+            BookingID: bookingID,
+            FlightType: "Round Trip",
+            TravelClass: "Economy",
+            DepartureAirportID: "YYC",
+            DepartureAirportName: "Calgary International Airport",
+            DepartureDateTime: "2024-12-01",
+            ArrivalAirportID: "JFK",
+            ArrivalAirportName: "John F Kenedy Intl Airport",
+            ArrivalDateTime: "2024-12-02",
+          };
+
+          const flightResponse = await fetch("/query/Flight", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: flightData }),
+          });
+
+          if (!flightResponse.ok) throw new Error("Failed to insert flight");
+
+          const flightResult = await flightResponse.json();
+          console.log("Flight inserted successfully:", flightResult);
+
+          const flightID = flightResult.FlightID;
+          if (!flightID) throw new Error("FlightID not returned");
+
+          // Insert Baggage
+          const baggageData = {
+            PassengerID: passengerID,
+            Weight: 23.5,
+            BaggageType: "Checked",
+            Status: "Not included",
+          };
+
+          const baggageResponse = await fetch("/query/Baggage", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: baggageData }),
+          });
+
+          if (!baggageResponse.ok) throw new Error("Failed to insert baggage");
+
+          const baggageResult = await baggageResponse.json();
+          console.log("Baggage inserted successfully:", baggageResult);
+
+          // Insert Contact
+          const contactData = {
+            PassengerID: passengerID,
+            PhoneType: "Mobile",
+            PhoneNumber: "+1 587-456-9873",
+            Email: "john.doe@example.ca",
+          };
+
+          const contactResponse = await fetch("/query/Contact", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: contactData }),
+          });
+
+          if (!contactResponse.ok) throw new Error("Failed to insert Contact");
+
+          const contactResult = await contactResponse.json();
+          console.log("Contact inserted successfully:", contactResult);
+
+          console.log("All records inserted successfully!");
+        } catch (error) {
+          console.error("Error during insertion chain:", error);
+        }
+      }
+    );
   }
 }

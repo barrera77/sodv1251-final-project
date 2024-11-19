@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 config.api_key = process.env.API_KEY;
-
+app.use(express.json());
 app.get("/search?", async (req, res) => {
   const {
     departure_id,
@@ -80,7 +80,7 @@ const __dirname = path.dirname(__filename);
 const configMssql = {
   user: process.env.MSSQL_USER_NAME,
   password: process.env.MSSQL_PASSWORD,
-  database: "AdventureWorks2022",
+  database: "BVC_Airlines_DB",
   server: "localhost",
   options: {
     encrypt: false,
@@ -154,23 +154,40 @@ app.post("/query/:table", async (req, res) => {
   const { table } = req.params;
   const { data } = req.body;
 
-  //Validate table name (consider using a whitelist for security)
-  const validTables = ["Contact", "Baggage", "Flight", "Passenger", "Booking"];
-  if (!validTables.includes(table)) {
+  const validTables = {
+    Contact: "ContactID",
+    Baggage: "BaggageID",
+    Flight: "FlightID",
+    Passenger: "PassengerID",
+    Booking: "BookingID",
+  };
+
+  // Validate table name
+  const idColumn = validTables[table];
+  if (!idColumn) {
     return res.status(400).json({ message: "Invalid table name." });
   }
 
-  // Generate columns and values strings for the SQL query
   const columns = Object.keys(data).join(", ");
   const values = Object.values(data)
     .map((value) => `'${value}'`)
     .join(", ");
+
   try {
     const pool = await poolPromise;
-    await pool
+
+    // Insert record and return the specific ID
+    const result = await pool
       .request()
-      .query(`INSERT INTO ${table} (${columns}) VALUES (${values})`);
-    res.status(200).json({ message: "Record inserted successfully." });
+      .query(
+        `INSERT INTO ${table} (${columns}) OUTPUT INSERTED.${idColumn} VALUES (${values})`
+      );
+
+    const insertedID = result.recordset[0][idColumn];
+    res.status(200).json({
+      message: "Record inserted successfully.",
+      [idColumn]: insertedID,
+    });
   } catch (err) {
     console.error("Error inserting record:", err);
     res
