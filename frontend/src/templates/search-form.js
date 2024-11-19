@@ -189,12 +189,7 @@ const SearchForm = `
                       id="infants-input"
                       aria-describedby="infants-label"
                     />
-                  <div class="form-check mx-3 py-2">
-                      <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                      <label class="form-check-label" for="flexCheckDefault">
-                        On lap
-                      </label>
-                  </div>
+             
                 </div>
                 <span id="infants-label" class="form-text">
                 Up to 2 years old
