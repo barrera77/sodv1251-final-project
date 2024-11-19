@@ -32,6 +32,7 @@ export default class extends AbstractView {
   }
 
   async postRender() {
+    this.getCountryID();
     this.initializeElements();
     const {
       originInput,
@@ -557,5 +558,34 @@ export default class extends AbstractView {
         });
       });
     }
+  }
+
+  getCountryID() {
+    this.domElements.sendQueryButton =
+      document.querySelector(".btn-send-query");
+
+    this.domElements.sendQueryButton.addEventListener(
+      "click",
+      async (event) => {
+        event.preventDefault();
+
+        // Ensure that the country name is passed correctly in the URL
+        const countryResponse = await fetch(
+          `/query?countryName=Mexico`, // Correct table name 'Country'
+          {
+            method: "GET", // Correct method
+            headers: { "Content-Type": "application/json" }, // Optional but keeps it consistent
+          }
+        );
+
+        if (!countryResponse.ok) {
+          throw new Error("Failed to get country ID");
+        }
+
+        // Log the response to check if the country result is received
+        const countryResult = await countryResponse.json();
+        console.log("Country Result:", countryResult); // Logs the country result
+      }
+    );
   }
 }

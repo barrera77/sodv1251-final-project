@@ -90,13 +90,20 @@ const configMssql = {
 };
 
 const poolPromise = mssql.connect(configMssql);
-/* 
-app.get("/query", async (req, res) => {
+
+/* REST API */
+// Fetch data from tables
+app.get("/query/:table", async (req, res) => {
+  const { table, column } = req.params;
+
+  // whitelist tables
+  const validTables = ["Contact", "Baggage", "Flight", "Passenger", "Booking"];
+  if (!validTables.includes(table)) {
+    return res.status(400).json({ message: "Invalid table name." });
+  }
   try {
     const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .query("SELECT * FROM HumanResources.Department");
+    const result = await pool.request().query(`SELECT ${column} FROM ${table}`);
     res.json(result.recordset);
   } catch (err) {
     console.error("Error fetching records:", err);
@@ -106,46 +113,59 @@ app.get("/query", async (req, res) => {
   }
 });
 
-app.post("/query", async (req, res) => {
+let countryData = null; // This will hold the country data globally for the server
+
+/* // Function to preload country data when server starts
+async function preloadCountryData() {
   try {
-    const query = req.body.query; // Expect a single query string
-    if (!query || typeof query !== "string") {
-      return res
-        .status(400)
-        .json({ message: "Invalid query format. Must be a string." });
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .query("SELECT CountryID FROM Country WHERE CountryName = 'Mexico'");
+
+    if (result.recordset.length > 0) {
+      countryData = result.recordset[0]; // Store the CountryID from the result
+      console.log("Preloaded Country Data:", countryData);
+    } else {
+      console.warn("No data found for 'Mexico'.");
     }
-
-    const pool = await poolPromise;
-    const result = await pool.request().query(query);
-
-    res.json(result.recordset); // Send the result as JSON
   } catch (err) {
-    console.error("Error executing query:", err);
-    res
-      .status(500)
-      .json({ message: "Error executing query", error: err.message });
+    console.error("Error preloading country data:", err.message);
   }
-}); */
+} 
+  preloadCountryData();*/
 
-/* REST API */
-// Fetch data from tables
-app.get("/query/:table", async (req, res) => {
-  const { table } = req.params;
+// Fetch the countryID
+app.get("/query", async (req, res) => {
+  const { countryName } = req.query;
 
-  // whitelist tables
-  const validTables = ["Contact", "Baggage", "Flight", "Passenger", "Booking"];
-  if (!validTables.includes(table)) {
-    return res.status(400).json({ message: "Invalid table name." });
+  // Debug logs
+  console.log("Received country name:", countryName);
+
+  if (!countryName) {
+    console.error("Missing country name in query.");
+    return res.status(400).json({ message: "Country name is required." });
   }
+
   try {
-    const pool = await poolPromise;
-    const result = await pool.request().query(`SELECT * FROM ${table}`);
-    res.json(result.recordset);
+    const pool = await mssql.connect(config); // Use mssql instead of sql
+    const result = await pool
+      .request()
+      .input("countryName", mssql.NVarChar, countryName)
+      .query(`SELECT CountryID FROM Country WHERE CountryName = @countryName`);
+
+    // Check if any result is returned
+    if (result.recordset.length > 0) {
+      const countryID = result.recordset[0].CountryID; // Access the first record
+      console.log("Country ID:", countryID);
+      res.json({ CountryID: countryID }); // Return just the CountryID
+    } else {
+      console.warn("No country found for:", countryName);
+      res.status(404).json({ message: "Country not found" });
+    }
   } catch (err) {
-    console.error("Error fetching records:", err);
-    res
-      .status(500)
-      .json({ message: "Error fetching records", error: err.message });
+    console.error("Database error:", err);
+    res.status(500).json({ message: "Database error", error: err.message });
   }
 });
 
