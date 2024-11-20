@@ -460,4 +460,18 @@ export default class extends AbstractView {
     const [formattedDate] = date.toISOString().split("T");
     return formattedDate;
   }
+
+  insertPassenger(countryId, registration) {
+    // Collect passenger data
+    const passengerData = {
+      FirstName: document.getElementById("name").value,
+      MiddleName: document.getElementById("middle-name").value,
+      LastName: document.getElementById("last-name").value,
+      CountryID: countryId,
+      Gender: document.getElementById("gender-input").value,
+      DateOfBirth: document.getElementById("birth-date").value,
+      isRegistered: registration,
+      RegisteredOn: "",
+    };
+  }
 }

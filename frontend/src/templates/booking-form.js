@@ -228,8 +228,8 @@ const BookingForm = (
                     <input
                       type="date"
                       class="form-control"
-                      id="departure-date-input"
-                      aria-describedby="departure-date-label"
+                      id="birth-date"
+                      aria-describedby="birth-date-label"
                     />
                   </div>
                 </div>
