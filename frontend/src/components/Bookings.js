@@ -60,10 +60,18 @@ export default class extends AbstractView {
 
   initializeElements() {
     this.domElements = {
+      nameInput: document.getElementById("name"),
+      middleNameInput: document.getElementById("middle-name"),
+      lastNameInput: document.getElementById("last-name"),
+      selectGender: document.getElementById("gender-input"),
+      selectDate: document.getElementById("birth-date"),
       nationalityOptions: document.getElementById("nationality-options"),
       nationalityInput: document.getElementById("nationality-input"),
       selectDialCode: document.querySelector(".select-dial-code"),
       btnCheckOut: document.querySelector(".btn-checkout"),
+      phoneTypeInput: document.getElementById("phone-type"),
+      phoneInput: document.getElementById("phone-number-input"),
+      emailInput: document.getElementById("email"),
     };
   }
 
@@ -251,10 +259,25 @@ export default class extends AbstractView {
     );
   }
 
+  /* TODO: make this the main function to handle the form
+  * and add fields validation
+  */
   handleFormData2() {
-    this.domElements.btnCheckOut = document.querySelector(".btn-checkout");
+    const {
+      btnCheckOut,
+      nameInput,
+      middleNameInput,
+      lastNameInput,
+      nationalityInput,
+      selectGender,
+      selectDate,
+      selectDialCode,
+      phoneInput,
+    } = this.domElements;
 
-    this.domElements.btnCheckOut.addEventListener("click", async (event) => {
+    //btnCheckOut = document.querySelector(".btn-checkout");
+
+    btnCheckOut.addEventListener("click", async (event) => {
       event.preventDefault();
 
       // Retrieve data from localStorage
@@ -294,10 +317,6 @@ export default class extends AbstractView {
           ? selectedFlightsData[0].flights[1].departure_airport.time
           : departureDate;
 
-      // Get country ID
-      const countryName = document.getElementById("nationality-input").value;
-      // let countryID = await this.getCountryID(countryName);
-
       try {
         // Insert Booking
         const bookingData = {
@@ -322,14 +341,27 @@ export default class extends AbstractView {
         const bookingID = bookingResult.BookingID;
         if (!bookingID) throw new Error("BookingID not returned");
 
+        const countryName = nationalityInput.value;
+
+        let countryID = null;
+        const countryResponse = await fetch(
+          `/query?countryName=${countryName}`
+        );
+        const countryData = await countryResponse.json();
+        countryID = countryData.CountryID;
+        console.log(countryID);
+
+        if (!countryID) throw new Error("Country ID not found");
+
         //Insert Passenger
         const passengerData = {
           BookingID: bookingID,
-          FirstName: "John",
-          LastName: "Doe",
-          CountryID: 1,
-          Gender: "F",
-          DateOfBirth: "1977-12-02",
+          FirstName: nameInput.value,
+          MiddleName: middleNameInput.value,
+          LastName: lastNameInput.value,
+          CountryID: countryID,
+          Gender: selectGender.value,
+          DateOfBirth: selectDate.value,
           IsRegistered: 1,
           RegisteredOn: "2000-11-22",
         };
@@ -395,11 +427,12 @@ export default class extends AbstractView {
         const baggageResult = await baggageResponse.json();
         console.log("Baggage inserted successfully:", baggageResult);
 
+        console.log(`${selectDialCode.value} ${phoneInput.value}`);
         // Insert Contact
         const contactData = {
           PassengerID: passengerID,
           PhoneType: "Mobile",
-          PhoneNumber: "+1 587-456-9873",
+          PhoneNumber: `${selectDialCode.value} ${phoneInput.value}`,
           Email: "john.doe@example.ca",
         };
 

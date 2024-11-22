@@ -211,8 +211,8 @@ const BookingForm = (
                       aria-describedby="gender-label"
                     >
                       <option value="0">Select...</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
+                      <option value="M">Male</option>
+                      <option value="F">Female</option>
                     </select>
                   </div>
                 </div>
@@ -353,7 +353,7 @@ const BookingForm = (
                             ? country.idd.suffixes[0]
                             : "";
 
-                        return `<option class="country-codes">${country.name.common} (${country.idd.root}${suffix})</option>`;
+                        return `<option value="${country.idd.root}" class="country-codes">${country.name.common} (${country.idd.root}${suffix})</option>`;
                       })
                       .join()}
                   </select>
