@@ -1,0 +1,82 @@
+-- Create the database
+CREATE DATABASE BVC_Airlines_DB;
+GO
+
+-- Use the database
+USE BVC_Airlines_DB;
+GO
+
+-- Create the tables
+-- Booking Table
+CREATE TABLE Booking (
+    BookingID INT IDENTITY(1,1) PRIMARY KEY,
+    Price DECIMAL(10,2) NOT NULL,    
+    NumberOfPassengers INT NOT NULL CHECK (NumberOfPassengers > 0),
+    DepartureDate DATE NOT NULL,
+	BookingOption NVARCHAR(100) NOT NULL,
+    ArrivalDate DATE NOT NULL,
+    CONSTRAINT CHK_ArrivalDate CHECK (ArrivalDate >= DepartureDate)
+);
+
+-- Passenger Table
+CREATE TABLE Passenger (
+    PassengerID INT IDENTITY(1,1) PRIMARY KEY,
+    BookingID INT NOT NULL,
+    FirstName NVARCHAR(100) NOT NULL,
+    MiddleName NVARCHAR(100) NULL,
+    LastName NVARCHAR(100) NOT NULL,
+    CountryID INT NOT NULL,
+    Gender CHAR(1) CHECK (Gender IN ('M', 'F')),
+    DateOfBirth DATE NOT NULL,
+	IsRegistered BIT NOT NULL,
+	RegisteredOn DATETIME NULL,
+	CONSTRAINT FK_Passenger_Booking FOREIGN KEY (BookingID) REFERENCES Booking(BookingID)
+	);
+	GO
+
+-- Flight Table
+CREATE TABLE Flight (
+    FlightID INT IDENTITY(1,1) PRIMARY KEY,
+    BookingID INT NOT NULL,
+    FlightType NVARCHAR(50) NOT NULL,
+	TravelClass NVARCHAR(50) NOT NULL CONSTRAINT  DF_TravelClass DEFAULT 'Economy' , 
+    DepartureAirportID NVARCHAR(10) NOT NULL,
+    DepartureAirportName NVARCHAR(100) NOT NULL,
+    DepartureDateTime DATETIME NOT NULL,
+    ArrivalAirportID NVARCHAR(10) NOT NULL,
+    ArrivalAirportName NVARCHAR(100) NOT NULL,
+    ArrivalDateTime DATETIME NOT NULL,
+    CONSTRAINT CHK_ArrivalAfterDeparture CHECK (ArrivalDateTime > DepartureDateTime),
+    FOREIGN KEY (BookingID) REFERENCES Booking(BookingID) ON DELETE CASCADE
+);
+
+
+-- Baggage Table
+CREATE TABLE Baggage (
+    BaggageID INT IDENTITY(1,1) PRIMARY KEY,
+    PassengerID INT NOT NULL,
+    BaggageType NVARCHAR(50) NOT NULL CHECK (BaggageType IN ('Carry-on', 'Checked', 'Special')),
+    Status NVARCHAR(50) NOT NULL CHECK (Status IN ('Added', 'Not Included')),
+    Weight DECIMAL(5,2) CHECK (Weight >= 0),
+    FOREIGN KEY (PassengerID) REFERENCES Passenger(PassengerID) ON DELETE CASCADE
+);
+
+-- Contact Table
+CREATE TABLE Contact (
+    ContactID INT IDENTITY(1,1) PRIMARY KEY,
+    PassengerID INT NOT NULL,
+    PhoneType NVARCHAR(50) NOT NULL CHECK (PhoneType IN ('Mobile', 'Home', 'Office')),
+    PhoneNumber NVARCHAR(20) NOT NULL,
+	Email NVARCHAR(100) NOT NULL,
+    FOREIGN KEY (PassengerID) REFERENCES Passenger(PassengerID) ON DELETE CASCADE
+);
+
+-- Country Table
+CREATE TABLE Country (
+    CountryID INT IDENTITY(1,1) PRIMARY KEY,
+    CountryName NVARCHAR(100) NOT NULL,
+    DialCode NVARCHAR(10) NOT NULL,
+    Suffix NVARCHAR(10) NULL
+);
+
+
