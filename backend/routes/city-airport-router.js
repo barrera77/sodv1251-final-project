@@ -1,31 +1,25 @@
-import Amadeus from "amadeus";
-import dotenv from "dotenv";
-import express from "express";
-import cors from "cors";
+import { Router } from "express";
+import fs from "fs/promises";
+import path from "path";
+import { fileURLToPath } from "url";
 
-dotenv.config();
-const app = express();
-app.use(cors());
-const cityAirportRouter = express.Router();
+const airportRoute = Router();
 
-const amadeus = new Amadeus({
-  clientId: process.env.AMADEUS_API_KEY,
-  clientSecret: process.env.AMADEUS_API_SECRET,
-});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-cityAirportRouter.get("/api/autocomplete", async (request, response) => {
+// Route to fetch airport data from the .json file
+airportRoute.get("/", async (req, res) => {
+  const filePath = path.resolve(__dirname, "../data/airports.json");
+
   try {
-    const { query } = request;
-    const { data } = await amadeus.referenceData.locations.get({
-      keyword: query.keyword,
-      subType: Amadeus.location.city,
-    });
-    response.json(data);
-    console.log(data);
-  } catch (error) {
-    console.error(error.response);
-    response.json([]);
+    const data = await fs.readFile(filePath, "utf8");
+    const airports = JSON.parse(data);
+    res.json(airports);
+  } catch (err) {
+    console.error("Error handling airport data:", err);
+    res.status(500).json({ error: "Failed to fetch airport data" });
   }
 });
 
-export default cityAirportRouter;
+export default airportRoute;

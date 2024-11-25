@@ -192,9 +192,7 @@ export default class extends AbstractView {
     clearTimeout(this.autocompleteTimeoutHandle);
     this.autocompleteTimeoutHandle = setTimeout(async () => {
       try {
-        const data = await getData(
-          "https://raw.githubusercontent.com/algolia/datasets/master/airports/airports.json"
-        );
+        const data = await getData("/airports");
 
         // get data
         let matches = data.filter((airport) => {

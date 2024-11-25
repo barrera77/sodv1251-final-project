@@ -5,8 +5,7 @@ import mssql from "mssql";
 import { fileURLToPath } from "url";
 import { getJson, config } from "serpapi";
 import cors from "cors";
-import { Connection, Request, TYPES } from "tedious";
-import url from "url";
+import airportRoutes from "../backend/routes/city-airport-router.js";
 
 dotenv.config();
 const app = express();
@@ -113,7 +112,7 @@ app.get("/query/:table", async (req, res) => {
   }
 });
 
-let countryData = null; // This will hold the country data globally for the server
+let countryData = null;
 
 /* // Function to preload country data when server starts
 async function preloadCountryData() {
@@ -148,17 +147,17 @@ app.get("/query", async (req, res) => {
   }
 
   try {
-    const pool = await mssql.connect(config); // Use mssql instead of sql
+    const pool = await mssql.connect(config);
     const result = await pool
       .request()
       .input("countryName", mssql.NVarChar, countryName)
       .query(`SELECT CountryID FROM Country WHERE CountryName = @countryName`);
 
-    // Check if any result is returned
+    // Check if results is not null or empty
     if (result.recordset.length > 0) {
-      const countryID = result.recordset[0].CountryID; // Access the first record
+      const countryID = result.recordset[0].CountryID; //Get the first record found
       console.log("Country ID:", countryID);
-      res.json({ CountryID: countryID }); // Return just the CountryID
+      res.json({ CountryID: countryID });
     } else {
       console.warn("No country found for:", countryName);
       res.status(404).json({ message: "Country not found" });
@@ -215,6 +214,9 @@ app.post("/query/:table", async (req, res) => {
       .json({ message: "Error inserting record", error: err.message });
   }
 });
+
+// airports route
+app.use("/airports", airportRoutes);
 
 // Serve static assets in production mode
 if (process.env.NODE_ENV === "production") {
