@@ -1,5 +1,6 @@
 import Home from "./components/Home.js";
 import Bookings from "./components/Bookings.js";
+import Confirmation from "./components/Confirmation.js";
 
 const pathToRegex = (path) =>
   new RegExp("^" + path.replace(/\//g, "\\/").replace(/:\w+/g, "(.+)") + "$");
@@ -32,6 +33,10 @@ const router = async () => {
     {
       path: "/booking-form",
       view: Bookings,
+    },
+    {
+      path: "/booking-confirmation",
+      view: Confirmation,
     },
   ];
 

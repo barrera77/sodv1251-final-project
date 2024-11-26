@@ -372,4 +372,8 @@ export default class extends AbstractView {
       RegisteredOn: "",
     };
   }
+
+  reset() {
+    
+  }
 }

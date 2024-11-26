@@ -270,7 +270,7 @@ const BookingForm = (
               </div>
              <div class="card p-3 mb-3">
                   <div class="row">
-                    <div class="col-10">
+                    <div class="col-8">
                       <div class="data">
                         <h5>Checked baggage</h5>
                       </div>
@@ -279,19 +279,25 @@ const BookingForm = (
                       </div>
                     </div>
                     <div class="col-2 text-center">
+                      <input type="number" class="form-control" value="0"></input>
+                    </div>
+                    <div class="col-2 text-center">
                         <button class="btn btn-dark px-5">Add</button>
                     </div>
                   </div>
              </div>
               <div class="card p-3">
                   <div class="row">
-                    <div class="col-10">
+                    <div class="col-8">
                       <div class="data">
                         <h5>Special baggage</h5>
                       </div>
                       <div class="subdata">
                         <i class="bi bi-suitcase2 text-danger"></i> Not included
                       </div>
+                    </div>
+                    <div class="col-2 text-center">
+                      <input type="number" class="form-control" value="0"></input>
                     </div>
                     <div class="col-2 text-center">
                         <button class="btn btn-dark px-5">Add</button>
