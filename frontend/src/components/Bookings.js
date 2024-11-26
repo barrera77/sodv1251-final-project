@@ -11,6 +11,8 @@ export default class extends AbstractView {
     this.nacionalitiesList = [];
     this.phoneCountryCodesList = [];
     this.countryNames = {};
+    this.specialBaggage = 0;
+    this.checkedBaggage = 0;
   }
 
   async getHtml() {
@@ -72,7 +74,17 @@ export default class extends AbstractView {
       phoneTypeInput: document.getElementById("phone-type"),
       phoneInput: document.getElementById("phone-number-input"),
       emailInput: document.getElementById("email"),
+      btnAddCheckedBaggage: document.querySelector(".btn-add-checked-baggage"),
+      btnAddSpecialBaggage: document.querySelector(".btn-add-special-baggage"),
+      specialBaggageCount: document.querySelector(".special-baggage-count"),
+      checkedBaggageCount: document.querySelector(".checked-baggage-count"),
+      addedSpecialBaggage: document.querySelector(".added-special-baggage"),
+      addedCheckedBaggage: document.querySelector(".added-checked-baggage"),
+      iconCheckedBaggage: document.querySelector(".icon-checked-baggage"),
+      iconSpecialBaggage: document.querySelector(".icon-special-baggage"),
     };
+
+    this.getBaggageDetails();
   }
 
   autocomplete(input, datalist, countryNames) {
@@ -243,7 +255,7 @@ export default class extends AbstractView {
         let departureAirport =
           selectedFlightsData[0].flights[0].departure_airport.name;
         let arrivalAirport =
-          selectedFlightsData[0].flights[2].arrival_airport.name;
+          selectedFlightsData[0].flights[1].arrival_airport.name;
 
         let travelClass = selectedFlightsData[0].flights[0].travel_class;
         // Insert Flight
@@ -273,24 +285,45 @@ export default class extends AbstractView {
         const flightID = flightResult.FlightID;
         if (!flightID) throw new Error("FlightID not returned");
 
-        // Insert Baggage
-        const baggageData = {
-          PassengerID: passengerID,
-          Weight: 23.5,
-          BaggageType: "Checked",
-          Status: "Not included",
-        };
+        /* TODO:Need to refactor to make only one POST request
+         *  for that will need to modify the server query to accept arrays
+         *  to inster more  than one record at a time
+         */
+        let baggageStatus = "Not included";
+        if (this.checkedBaggage > 0) {
+          baggageStatus = "Added";
 
-        const baggageResponse = await fetch("/query/Baggage", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: baggageData }),
-        });
+          const baggageDataArray = [];
 
-        if (!baggageResponse.ok) throw new Error("Failed to insert baggage");
+          for (let i = 0; i < this.checkedBaggage; i++) {
+            // Insert Checked Baggage
+            const baggageData = {
+              PassengerID: passengerID,
+              Weight: 23.5,
+              BaggageType: "Checked",
+              Status: baggageStatus,
+            };
 
-        const baggageResult = await baggageResponse.json();
-        console.log("Baggage inserted successfully:", baggageResult);
+            baggageDataArray.push(baggageData);
+            console.log(baggageDataArray[i]);
+
+            try {
+              const baggageResponse = await fetch("/query/Baggage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ data: baggageDataArray[i] }),
+              });
+
+              if (!baggageResponse.ok)
+                throw new Error("Failed to insert baggage");
+
+              const baggageResult = await baggageResponse.json();
+              console.log("Baggage inserted successfully:", baggageResult);
+            } catch (error) {
+              console.error("Error inserting baggage:", error);
+            }
+          }
+        }
 
         console.log(`${selectDialCode.value} ${phoneInput.value}`);
         // Insert Contact
@@ -374,6 +407,53 @@ export default class extends AbstractView {
   }
 
   reset() {
-    
+    const {
+      btnCheckOut,
+      nameInput,
+      middleNameInput,
+      lastNameInput,
+      nationalityInput,
+      selectGender,
+      selectDate,
+      selectDialCode,
+      phoneInput,
+    } = this.domElements;
+  }
+
+  getBaggageDetails() {
+    const {
+      specialBaggageCount,
+      checkedBaggageCount,
+      btnAddCheckedBaggage,
+      btnAddSpecialBaggage,
+      addedCheckedBaggage,
+      addedSpecialBaggage,
+      iconCheckedBaggage,
+      iconSpecialBaggage,
+    } = this.domElements;
+
+    //let passengerName = `${nameInput.value}+ " " +${lastNameInput.value}`;
+
+    btnAddSpecialBaggage.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.specialBaggage = specialBaggageCount.value;
+
+      if (this.specialBaggage > 0) {
+        addedSpecialBaggage.textContent = `Added x ${this.specialBaggage}`;
+        iconSpecialBaggage.classList.remove("text-danger");
+        iconSpecialBaggage.classList.add("text-success");
+      }
+    });
+
+    btnAddCheckedBaggage.addEventListener("click", (event) => {
+      event.preventDefault();
+      this.checkedBaggage = checkedBaggageCount.value;
+
+      if (this.checkedBaggage > 0) {
+        addedCheckedBaggage.textContent = `Added x ${this.checkedBaggage}`;
+        iconCheckedBaggage.classList.remove("text-danger");
+        iconCheckedBaggage.classList.add("text-success");
+      }
+    });
   }
 }

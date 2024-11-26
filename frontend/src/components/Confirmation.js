@@ -48,7 +48,7 @@ export default class extends AbstractView {
                             <div>
                                 <button class="btn btn-dark"><i class="bi bi-printer"></i> Print</button>
                             </div>
-                        </div>          
+                        </div>
                     </div>
                 </div>
 
@@ -60,18 +60,28 @@ export default class extends AbstractView {
                     <div class="border-bottom border-secondary-subttle" >
                         <div class="row py-3 w-100 m-auto">
                             <div class="col-5">
-                                <p class="fw-bold">Booking References</p>                                
+                                <p class="fw-bold">Booking References</p>
                             </div>
                             <div class="col-7">
-                                <p>Use your booking reference when you check in online for your flight. It's also useful if you need to contact the airline about your flight.</p>                               
-                            </div>                        
+                                <p>Use your booking reference when you check in online for your flight. It's also useful if you need to contact the airline about your flight.</p>
+                            </div>
                         </div>
                         <div class="row w-100 m-auto">
                             <div class="col-5">
-                                <ul class="ps-0"> 
-                                    <li class="list-group-item">YYC <i class="bi bi-arrow-right"></i> JFK</li>
-                                    <li class="list-group-item py-3">YYC <i class="bi bi-arrow-right"></i> JFK</li>
-                                    <li class="list-group-item">YYC <i class="bi bi-arrow-right"></i> JFK</li>
+                                <ul class="ps-0">
+                                ${
+                                  selectedFlightsData[0].type === "Round trip"
+                                    ? `
+                                    <li class="list-group-item">${selectedFlightsData[0].flights[0].departure_airport.id} <i class="bi bi-arrow-right"></i> ${selectedFlightsData[0].flights[1].arrival_airport.id}</li>
+                                    <li class="list-group-item py-3">${selectedFlightsData[0].flights[1].arrival_airport.id} <i class="bi bi-arrow-right"></i> ${selectedFlightsData[0].flights[0].departure_airport.id}</li>                                    
+                                    `
+                                    : ` 
+                                    <li class="list-group-item">
+                                          ${selectedFlightsData[0].flights[0].departure_airport.id} 
+                                                <i class="bi bi-arrow-right"></i> 
+                                                      ${selectedFlightsData[0].flights[0].arrival_airport.id}
+                                     </li>`
+                                }                                    
                                 </ul>                            
                             </div>
                             <div class="col-7">
@@ -132,27 +142,43 @@ export default class extends AbstractView {
                         <div>
                        
                             <div class="d-flex justify-content-between align-items-center">
-                                <div><span>${numOfPassengers}</span> passenger(s)</span> - <strong>CAD $<span>${parseInt(
+                                                            <div><span>${numOfPassengers}</span> passenger(s)</span> - <strong>CAD $<span>${parseInt(
       bookingOption.price
     ).toFixed(2)}</span></strong></div>                                
-                            </div>
-                                <div class="">
-                                    <div class="card p-3 mt-3">
-                                    <div class="row">
-                                        <div class="col-2">
-                                            <img src="${
-                                              selectedFlightsData[0].flights[0]
-                                                .airline_logo
-                                            }"/>
-                                        </div>
-                                        <div class="data col-10 pt-2">
-                                            <div><span class="fw-bold">${
-                                              selectedFlightsData[0].flights[0]
-                                                .departure_airport.name
-                                            } - ${
+                                                        </div>
+                                                            <div class="">
+                                                                <div class="card p-3 mt-3">
+                                                                <div class="row">
+                                                                    <div class="col-2">
+                                                                        <img src="${
+                                                                          selectedFlightsData[0]
+                                                                            .flights[0]
+                                                                            .airline_logo
+                                                                        }"/>
+                                                                    </div>
+                                                                    <div class="data col-7 pt-2">
+                                                                        <div><span class="fw-bold">${
+                                                                          selectedFlightsData[0]
+                                                                            .flights[0]
+                                                                            .departure_airport
+                                                                            .name
+                                                                        } - ${
       selectedFlightsData[0].flights[0].departure_airport.id
     }</span></div>
                                             <div class="subdata"><span class="">${departureDate}</span></div>
+                                            </div>
+                                            <div class="col-3">
+                                               <div>
+                                                    <div class="data">
+                                                        <p>Checked baggage <i class="bi bi-suitcase2 text-success"></i> x 1</p>
+                                                    </div>
+                                                   
+                                               </div>
+                                                <div>
+                                                    <div class="data">
+                                                        <p>Special baggage <i class="bi bi-suitcase2 text-success"></i> x 1</p>
+                                                    </div>                                                   
+                                               </div>
                                             </div>
                                         </div>
                                     </div>
@@ -164,7 +190,7 @@ export default class extends AbstractView {
                                                     .flights[1].airline_logo
                                                 }"/>
                                             </div>
-                                        <div class="col-10 pt-3">
+                                        <div class="col-7 pt-3">
                                             <div class="data"><span class="fw-bold">${
                                               selectedFlightsData[0].flights
                                                 .length > 1
@@ -181,7 +207,21 @@ export default class extends AbstractView {
     }</span></div>
                                             <div class="subdata">${arrivalDate}</div>
                                             </div>
+                                             <div class="col-3">
+                                               <div>
+                                                    <div class="data">
+                                                        <p>Checked baggage <i class="bi bi-suitcase2 text-success"></i> x 1</p>
+                                                    </div>
+                                                   
+                                               </div>
+                                                <div>
+                                                    <div class="data">
+                                                        <p>Special baggage <i class="bi bi-suitcase2 text-success"></i> x 1</p>
+                                                    </div>                                                   
+                                               </div>
+                                            </div>
                                         </div>
+                                       
                                      </div>
                                 </div>
                         </div>

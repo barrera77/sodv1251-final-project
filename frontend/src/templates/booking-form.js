@@ -275,14 +275,14 @@ const BookingForm = (
                         <h5>Checked baggage</h5>
                       </div>
                       <div class="subdata">
-                        <i class="bi bi-suitcase2 text-danger"></i> Not included
+                        <i class="bi bi-suitcase2 text-danger icon-checked-baggage"></i> <span class="added-checked-baggage">Not included</span>
                       </div>
                     </div>
                     <div class="col-2 text-center">
-                      <input type="number" class="form-control" value="0"></input>
+                      <input type="number" class="form-control checked-baggage-count" value="0"></input>
                     </div>
                     <div class="col-2 text-center">
-                        <button class="btn btn-dark px-5">Add</button>
+                        <button class="btn btn-dark px-5 btn-add-checked-baggage">Add</button>
                     </div>
                   </div>
              </div>
@@ -293,14 +293,14 @@ const BookingForm = (
                         <h5>Special baggage</h5>
                       </div>
                       <div class="subdata">
-                        <i class="bi bi-suitcase2 text-danger"></i> Not included
+                        <i class="bi bi-suitcase2 text-danger icon-special-baggage"></i> <span class="added-special-baggage">Not included</span>
                       </div>
                     </div>
                     <div class="col-2 text-center">
-                      <input type="number" class="form-control" value="0"></input>
+                      <input type="number" class="form-control special-baggage-count" value="0"></input>
                     </div>
                     <div class="col-2 text-center">
-                        <button class="btn btn-dark px-5">Add</button>
+                        <button class="btn btn-dark px-5 btn-add-special-baggage">Add</button>
                     </div>
                   </div>
               </div>    
