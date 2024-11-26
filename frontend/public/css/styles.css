@@ -250,6 +250,11 @@ section {
   width: 55%;
 }
 
+.btn-signin,
+.btn-checkout {
+  width: 40%;
+}
+
 /* Footer */
 
 footer {

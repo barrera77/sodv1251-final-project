@@ -5,6 +5,7 @@ import { getData } from "../utils/api-utility.js";
 import FlightCard from "../templates/flight-card.js";
 import BookingOptionsCard from "../templates/booking-options-card.js";
 import SelectedFlightCard from "../templates/selected-flights-card.js";
+import SigninForm from "../templates/sign-form.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -27,6 +28,10 @@ export default class extends AbstractView {
 
           <button class="btn btn-outline-success btn-send-query">Send Query</button>
           
+          </div>
+
+          <div class="signin-form">
+            ${SigninForm}          
           </div>
         `;
   }

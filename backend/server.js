@@ -114,26 +114,6 @@ app.get("/query/:table", async (req, res) => {
 
 let countryData = null;
 
-/* // Function to preload country data when server starts
-async function preloadCountryData() {
-  try {
-    const pool = await poolPromise;
-    const result = await pool
-      .request()
-      .query("SELECT CountryID FROM Country WHERE CountryName = 'Mexico'");
-
-    if (result.recordset.length > 0) {
-      countryData = result.recordset[0]; // Store the CountryID from the result
-      console.log("Preloaded Country Data:", countryData);
-    } else {
-      console.warn("No data found for 'Mexico'.");
-    }
-  } catch (err) {
-    console.error("Error preloading country data:", err.message);
-  }
-} 
-  preloadCountryData();*/
-
 // Fetch the countryID
 app.get("/query", async (req, res) => {
   const { countryName } = req.query;

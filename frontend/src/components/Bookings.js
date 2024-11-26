@@ -1,6 +1,7 @@
 import BookingForm from "../templates/booking-form.js";
 import AbstractView from "./AbstractView.js";
 import { getData } from "../utils/api-utility.js";
+import SigninForm from "../templates/sign-form.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -36,6 +37,10 @@ export default class extends AbstractView {
        bookingData,
        selectedFlightsData
      )}
+
+     <div class="container-sm p-3 border mt-3" id="signin-form" hidden>
+        ${SigninForm}          
+      </div>
      </div>
         
         `;
@@ -71,6 +76,7 @@ export default class extends AbstractView {
       nationalityInput: document.getElementById("nationality-input"),
       selectDialCode: document.querySelector(".select-dial-code"),
       btnCheckOut: document.querySelector(".btn-checkout"),
+      btnSignIn: document.querySelector(".btn-signin"),
       phoneTypeInput: document.getElementById("phone-type"),
       phoneInput: document.getElementById("phone-number-input"),
       emailInput: document.getElementById("email"),
@@ -82,9 +88,12 @@ export default class extends AbstractView {
       addedCheckedBaggage: document.querySelector(".added-checked-baggage"),
       iconCheckedBaggage: document.querySelector(".icon-checked-baggage"),
       iconSpecialBaggage: document.querySelector(".icon-special-baggage"),
+      signInForm: document.getElementById("signin-form"),
+      messageElement: document.getElementById(elementId),
     };
 
     this.getBaggageDetails();
+    this.handleSignInButton();
   }
 
   autocomplete(input, datalist, countryNames) {
@@ -306,22 +315,21 @@ export default class extends AbstractView {
 
             baggageDataArray.push(baggageData);
             console.log(baggageDataArray[i]);
+          }
+          try {
+            const baggageResponse = await fetch("/query/Baggage", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ data: baggageDataArray }),
+            });
 
-            try {
-              const baggageResponse = await fetch("/query/Baggage", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ data: baggageDataArray[i] }),
-              });
+            if (!baggageResponse.ok)
+              throw new Error("Failed to insert baggage");
 
-              if (!baggageResponse.ok)
-                throw new Error("Failed to insert baggage");
-
-              const baggageResult = await baggageResponse.json();
-              console.log("Baggage inserted successfully:", baggageResult);
-            } catch (error) {
-              console.error("Error inserting baggage:", error);
-            }
+            const baggageResult = await baggageResponse.json();
+            console.log("Baggage inserted successfully:", baggageResult);
+          } catch (error) {
+            console.error("Error inserting baggage:", error);
           }
         }
 
@@ -455,5 +463,78 @@ export default class extends AbstractView {
         iconCheckedBaggage.classList.add("text-success");
       }
     });
+  }
+
+  handleSignInButton() {
+    const { btnSignIn, signInForm } = this.domElements;
+
+    btnSignIn.addEventListener("click", (event) => {
+      event.preventDefault();
+
+      signInForm.classList.add("d-block");
+    });
+  }
+
+  /**
+   * handle login form submission
+   * @param {*} event
+   */
+  handleSigninForm(event) {
+    event.preventDefault(); //TODO: modify for this form
+
+    const formData = new FormData(event.target);
+
+    //get data from the form
+    const loginData = Object.fromEntries(formData.entries());
+    console.log("data", loginData);
+
+    //Validate data
+    const isValidForm = validateLoginForm(loginData);
+
+    //if is valid data log in
+    if (isValidForm) {
+      let isSuccess = customerLogin(loginData);
+
+      if (isSuccess) {
+        isLogged = true;
+        resetForms();
+        hideForms();
+        logOut();
+      } else {
+        isLogged = false;
+      }
+    }
+  }
+
+  /**
+   * validate the login form data
+   * @param {*} data
+   * @returns
+   */
+  validateLoginForm(data) {
+    const {} = this.domElements;
+    let isValid = true;
+
+    isValid = validateField(data.username, "invalid-login-username") && isValid;
+    isValid = validateField(data.password, "invalid-login-password") && isValid;
+
+    return Boolean(isValid);
+  }
+
+  /**
+   * validate individual fields
+   * @param {*} value
+   * @param {*} elementId
+   */
+  validateField(value, elementId) {
+    const { messageElement } = this.domElements;
+
+    if (!value) {
+      messageElement.classList.add("d-block");
+      return false;
+    } else {
+      messageElement.classList.remove("d-block");
+      return true;
+    }
   }
 }

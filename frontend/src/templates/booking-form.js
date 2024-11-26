@@ -27,15 +27,15 @@ const BookingForm = (
 
   return ` 
 <div class="container-sm p-3 border flight-booking">
-    <section class="flight-summary-section">
-      <div class="card p-3">
+ <div class="card p-3">
         <div class="row">
           <div>
             <h4>Flight Summary</h4>
           </div>          
         </div>
       </div>
-      <div class="form-content margin mt-3">
+    <section class="flight-summary-section">     
+      <div class="form-content margin mt-2">
            <div class="row">
              <div class="col-6">
                 <div class="card p-3">
@@ -96,8 +96,9 @@ const BookingForm = (
                       <span class="subdata">Includes taxes and carrier-imposed fees </span>
                     </div>
                   </div>
-                   <div class="pt-3 text-center">
-                      <button class="btn btn-checkout btn-dark w-50">Checkout</button>
+                   <div class="pt-3 d-flex justify-content-between">
+                      <a href="signin-form" class="btn btn-outline-dark btn-signin">Sign In</a>
+                      <button class="btn btn-checkout btn-dark">Checkout as a Guest</button>
                     </div>
                 </div>
                 </div>              
@@ -410,7 +411,7 @@ const BookingForm = (
             </div>
           </div>
         </div>
-      </section>
+      </section>      
     </div>
   </div>`;
 };
