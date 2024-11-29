@@ -242,6 +242,14 @@ export default class extends AbstractView {
 
   async postRender() {}
 
+  /**
+   * generate random numbers to simulate a customer reference number and PIN
+   * normally used for contacting customer service
+   * @param {*} min
+   * @param {*} max
+   * @param {*} count
+   * @returns
+   */
   getRandomNums(min, max, count) {
     const randomNumbers = [];
 
@@ -251,6 +259,11 @@ export default class extends AbstractView {
     return randomNumbers;
   }
 
+  /**
+   * Generate a set of random letters to simulate the booking confimration
+   * @param {*} count
+   * @returns
+   */
   getRandomLetters(count) {
     const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const randomLetters = [];
@@ -262,15 +275,20 @@ export default class extends AbstractView {
     return randomLetters;
   }
 
+  /**
+   * format date to US locale
+   * @param {*} dateString
+   * @returns
+   */
   formatDate(dateString) {
     const date = new Date(dateString);
 
     return (
       date.toLocaleDateString("en-US", {
-        weekday: "long", // Full weekday name
-        day: "numeric", // Numeric day of the month
-        month: "long", // Full month name
-        year: "numeric", // Full year
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
       }) +
       ` - ${date.toLocaleTimeString("en-US", {
         hour: "numeric",

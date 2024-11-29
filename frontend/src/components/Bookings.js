@@ -89,7 +89,7 @@ export default class extends AbstractView {
       iconCheckedBaggage: document.querySelector(".icon-checked-baggage"),
       iconSpecialBaggage: document.querySelector(".icon-special-baggage"),
       signInForm: document.getElementById("signin-form"),
-      messageElement: document.getElementById(elementId),
+      //messageElement: document.getElementById(elementId),
     };
 
     this.getBaggageDetails();
@@ -535,6 +535,76 @@ export default class extends AbstractView {
     } else {
       messageElement.classList.remove("d-block");
       return true;
+    }
+  }
+
+  async sendBookingConfirmation() {
+    /* Collect data and send it to the server via AJAX */
+    const { emailInput, nameInput } = this.domElements;
+
+    //Flight Airports
+    let departureAirport =
+      selectedFlightsData[0].flights[0].departure_airport.name;
+    let arrivalAirport = selectedFlightsData[0].flights[1].arrival_airport.name;
+
+    //get the required data top compose the email
+    const emailData = {
+      to: emailInput.value,
+      cc: "",
+      bcc: "",
+      subject: "Flight Booking Confirmation",
+      message: `
+      Details of your flight booking
+      
+      Hi ${nameInput.value}
+      Thank you for booking your flight with us!
+
+      Booking References
+      ----------------------------------------------
+      outbound flight         Booking reference
+      Return flight           Booking reference
+
+      Customer reference and PIN
+      ----------------------------------------------
+      Customer reference      00-0000000
+      PIN Code                0809
+
+      Your flight details
+      ----------------------------------------------
+      Calgary International Airport - YYC           Friday, December 6, 2024 - 11:55 AM
+      John F. Kennedy International Airport - JFK   Saturday, January 11, 2025 - 3:55 PM
+
+
+      If you have any questions, feel free to contact our customer support.
+
+      Safe travels!
+    
+      Best regards,
+      BVC Airlines Team
+
+
+
+      
+      
+      `,
+    };
+
+    try {
+      const response = await fetch("/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(emailData),
+      });
+
+      if (response.ok) {
+        alert("Message sent succesfully!");
+        this.resetForms();
+      } else {
+        alert("Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Error sending email.");
     }
   }
 }

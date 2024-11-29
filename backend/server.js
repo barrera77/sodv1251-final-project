@@ -213,6 +213,56 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
+//email
+app.post("/send-email", async (req, res) => {
+  const { to, cc, bcc, subject } = req.body;
+
+  // Configure SMTP transporter
+  const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.SENDER_USERNAME,
+      pass: process.env.SENDER_PASSWORD,
+    },
+  });
+
+  //configure mail options
+  const mailOptions = {
+    from: {
+      name: "BVC Airlines Ticket Booking System",
+      address: process.env.SENDER_USERNAME,
+    },
+    to: to,
+    cc: cc || "",
+    bcc: bcc || "",
+    subject,
+    text: "Flight Confirmation.", // Replace with actual message
+    attachments: [
+      /* {
+        filename: "invitation.pdf",
+        path: path.join(__dirname, "invitation.pdf"),
+        contentType: "application/pdf",
+      },
+      {
+        filename: "sample.jpg",
+        path: path.join(__dirname, "sample.jpg"),
+        contentType: "image/jpg",
+      }, */
+    ],
+  };
+
+  try {
+    console.log("Received email data:", req.body);
+    await transporter.sendMail(mailOptions);
+    res.send("Email sent successfully!");
+  } catch (error) {
+    console.error("Error sending email:", error);
+    res.status(500).send("Failed to send email");
+  }
+});
+
 // Listen on port 5001
 const PORT = process.env.PORT || 5002;
 app.listen(PORT, () =>
