@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import { getJson, config } from "serpapi";
 import cors from "cors";
 import airportRoutes from "../backend/routes/city-airport-router.js";
+import nodemailer from "nodemailer";
 
 dotenv.config();
 const app = express();
@@ -215,7 +216,7 @@ if (process.env.NODE_ENV === "production") {
 
 //email
 app.post("/send-email", async (req, res) => {
-  const { to, cc, bcc, subject } = req.body;
+  const { to, cc, bcc, subject, message } = req.body;
 
   // Configure SMTP transporter
   const transporter = nodemailer.createTransport({
@@ -238,19 +239,8 @@ app.post("/send-email", async (req, res) => {
     cc: cc || "",
     bcc: bcc || "",
     subject,
-    text: "Flight Confirmation.", // Replace with actual message
-    attachments: [
-      /* {
-        filename: "invitation.pdf",
-        path: path.join(__dirname, "invitation.pdf"),
-        contentType: "application/pdf",
-      },
-      {
-        filename: "sample.jpg",
-        path: path.join(__dirname, "sample.jpg"),
-        contentType: "image/jpg",
-      }, */
-    ],
+    text: "Flight Confirmation.",
+    html: message,
   };
 
   try {

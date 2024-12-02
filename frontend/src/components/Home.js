@@ -23,13 +23,6 @@ export default class extends AbstractView {
             ${Hero} 
             ${SearchForm} 
           </div>
-
-          <div class="query-form">
-
-          <button class="btn btn-outline-success btn-send-query">Send Query</button>
-          
-          </div>
-
           <div class="signin-form">
             ${SigninForm}          
           </div>
@@ -37,7 +30,7 @@ export default class extends AbstractView {
   }
 
   async postRender() {
-    this.getCountryID();
+   // this.getCountryID();
     this.initializeElements();
     const {
       originInput,
@@ -563,7 +556,7 @@ export default class extends AbstractView {
     }
   }
 
-  getCountryID() {
+  /*  getCountryID() {
     this.domElements.sendQueryButton =
       document.querySelector(".btn-send-query");
 
@@ -590,5 +583,5 @@ export default class extends AbstractView {
         console.log("Country Result:", countryResult); // Logs the country result
       }
     );
-  }
+  } */
 }

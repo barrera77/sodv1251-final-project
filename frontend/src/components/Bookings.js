@@ -2,6 +2,7 @@ import BookingForm from "../templates/booking-form.js";
 import AbstractView from "./AbstractView.js";
 import { getData } from "../utils/api-utility.js";
 import SigninForm from "../templates/sign-form.js";
+import emailBody from "../templates/email-body.js";
 
 export default class extends AbstractView {
   constructor(params) {
@@ -315,21 +316,22 @@ export default class extends AbstractView {
 
             baggageDataArray.push(baggageData);
             console.log(baggageDataArray[i]);
-          }
-          try {
-            const baggageResponse = await fetch("/query/Baggage", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ data: baggageDataArray }),
-            });
 
-            if (!baggageResponse.ok)
-              throw new Error("Failed to insert baggage");
+            try {
+              const baggageResponse = await fetch("/query/Baggage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ data: baggageDataArray[i] }),
+              });
 
-            const baggageResult = await baggageResponse.json();
-            console.log("Baggage inserted successfully:", baggageResult);
-          } catch (error) {
-            console.error("Error inserting baggage:", error);
+              if (!baggageResponse.ok)
+                throw new Error("Failed to insert baggage");
+
+              const baggageResult = await baggageResponse.json();
+              console.log("Baggage inserted successfully:", baggageResult);
+            } catch (error) {
+              console.error("Error inserting baggage:", error);
+            }
           }
         }
 
@@ -357,6 +359,8 @@ export default class extends AbstractView {
       } catch (error) {
         console.error("Error during insertion chain:", error);
       }
+
+      this.sendBookingConfirmation();
     });
   }
 
@@ -542,51 +546,18 @@ export default class extends AbstractView {
     /* Collect data and send it to the server via AJAX */
     const { emailInput, nameInput } = this.domElements;
 
-    //Flight Airports
+    /* //Flight Airports
     let departureAirport =
       selectedFlightsData[0].flights[0].departure_airport.name;
     let arrivalAirport = selectedFlightsData[0].flights[1].arrival_airport.name;
-
+ */
     //get the required data top compose the email
     const emailData = {
       to: emailInput.value,
       cc: "",
       bcc: "",
       subject: "Flight Booking Confirmation",
-      message: `
-      Details of your flight booking
-      
-      Hi ${nameInput.value}
-      Thank you for booking your flight with us!
-
-      Booking References
-      ----------------------------------------------
-      outbound flight         Booking reference
-      Return flight           Booking reference
-
-      Customer reference and PIN
-      ----------------------------------------------
-      Customer reference      00-0000000
-      PIN Code                0809
-
-      Your flight details
-      ----------------------------------------------
-      Calgary International Airport - YYC           Friday, December 6, 2024 - 11:55 AM
-      John F. Kennedy International Airport - JFK   Saturday, January 11, 2025 - 3:55 PM
-
-
-      If you have any questions, feel free to contact our customer support.
-
-      Safe travels!
-    
-      Best regards,
-      BVC Airlines Team
-
-
-
-      
-      
-      `,
+      message: ` ${emailBody(nameInput.value)}`,
     };
 
     try {
@@ -598,7 +569,6 @@ export default class extends AbstractView {
 
       if (response.ok) {
         alert("Message sent succesfully!");
-        this.resetForms();
       } else {
         alert("Failed to send message");
       }
