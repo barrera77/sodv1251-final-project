@@ -37,11 +37,7 @@ export default class extends AbstractView {
        bookingOption,
        bookingData,
        selectedFlightsData
-     )}
-
-     <div class="container-sm p-3 border mt-3" id="signin-form" hidden>
-        ${SigninForm}          
-      </div>
+     )}     
      </div>
         
         `;
@@ -90,7 +86,7 @@ export default class extends AbstractView {
       iconCheckedBaggage: document.querySelector(".icon-checked-baggage"),
       iconSpecialBaggage: document.querySelector(".icon-special-baggage"),
       signInForm: document.getElementById("signin-form"),
-      //messageElement: document.getElementById(elementId),
+      logoutButton: document.querySelector(".btn-logout"),
     };
 
     this.getBaggageDetails();
@@ -474,72 +470,63 @@ export default class extends AbstractView {
 
     btnSignIn.addEventListener("click", (event) => {
       event.preventDefault();
-
+      signInForm.classList.remove("d-none");
       signInForm.classList.add("d-block");
     });
   }
 
-  /**
-   * handle login form submission
-   * @param {*} event
-   */
-  handleSigninForm(event) {
-    event.preventDefault(); //TODO: modify for this form
+  handleSignInForm() {
+    const { signInForm, logoutButton } = this.domElements;
+    signInForm.addEventListener("submit", async (event) => {
+      event.preventDefault(); // Prevent the form from reloading the page
 
-    const formData = new FormData(event.target);
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
 
-    //get data from the form
-    const loginData = Object.fromEntries(formData.entries());
-    console.log("data", loginData);
+      try {
+        const response = await fetch("/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password }),
+        });
 
-    //Validate data
-    const isValidForm = validateLoginForm(loginData);
+        const result = await response.json();
 
-    //if is valid data log in
-    if (isValidForm) {
-      let isSuccess = customerLogin(loginData);
+        if (result.success) {
+          logoutButton.classList.add("d-block");
+          logoutButton.classList.remove("d-none");
+          alert("Login successful!");
 
-      if (isSuccess) {
-        isLogged = true;
-        resetForms();
-        hideForms();
-        logOut();
-      } else {
-        isLogged = false;
+          // Hide the login form
+          signInForm.classList.remove("d-block");
+          signInForm.classList.add("d-none");
+        } else {
+          alert(result.message);
+        }
+      } catch (error) {
+        console.error("Error during login:", error);
       }
-    }
+    });
   }
 
-  /**
-   * validate the login form data
-   * @param {*} data
-   * @returns
-   */
-  validateLoginForm(data) {
-    const {} = this.domElements;
-    let isValid = true;
+  handleLogoutButton() {
+    this.domElements.logoutButton.addEventListener("click", async () => {
+      try {
+        const response = await fetch("/logout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
 
-    isValid = validateField(data.username, "invalid-login-username") && isValid;
-    isValid = validateField(data.password, "invalid-login-password") && isValid;
+        const result = await response.json();
 
-    return Boolean(isValid);
-  }
-
-  /**
-   * validate individual fields
-   * @param {*} value
-   * @param {*} elementId
-   */
-  validateField(value, elementId) {
-    const { messageElement } = this.domElements;
-
-    if (!value) {
-      messageElement.classList.add("d-block");
-      return false;
-    } else {
-      messageElement.classList.remove("d-block");
-      return true;
-    }
+        if (result.success) {
+          logoutButton.classList.remove("d-block");
+          logoutButton.classList.add("d-none");
+        }
+      } catch (error) {
+        console.error("Error during logout:", error);
+      }
+    });
   }
 
   async sendBookingConfirmation() {

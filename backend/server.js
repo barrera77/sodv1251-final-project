@@ -7,6 +7,65 @@ import { getJson, config } from "serpapi";
 import cors from "cors";
 import airportRoutes from "../backend/routes/city-airport-router.js";
 import nodemailer from "nodemailer";
+import passport from "passport";
+import session from "express-session";
+import initializePassport from "./passport-config.js";
+
+//#region Authentication
+
+initializePassport();
+
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Login route
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ success: false, message: "An error occurred." });
+    }
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials." });
+    }
+    req.logIn(user, (err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Failed to log in." });
+      }
+      return res
+        .status(200)
+        .json({ success: true, message: "Login successful." });
+    });
+  })(req, res, next);
+});
+
+//logout route
+app.post("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res
+        .status(500)
+        .json({ success: false, message: "Failed to log out." });
+    }
+    res.status(200).json({ success: true, message: "Logout successful." });
+  });
+});
+
+//#endregion
+
+//#region Flights API
 
 dotenv.config();
 const app = express();
@@ -71,6 +130,7 @@ app.get("/search?", async (req, res) => {
       .json({ message: "Error fetching flight data", error: error.message });
   }
 });
+//#endregion
 
 // Get the current directory
 const __filename = fileURLToPath(import.meta.url);
@@ -214,7 +274,7 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-//email
+//#region email
 app.post("/send-email", async (req, res) => {
   const { to, cc, bcc, subject, message } = req.body;
 
@@ -252,6 +312,8 @@ app.post("/send-email", async (req, res) => {
     res.status(500).send("Failed to send email");
   }
 });
+
+//#endregion
 
 // Listen on port 5001
 const PORT = process.env.PORT || 5002;

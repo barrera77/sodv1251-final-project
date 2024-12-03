@@ -22,15 +22,12 @@ export default class extends AbstractView {
           <div class="html-container">
             ${Hero} 
             ${SearchForm} 
-          </div>
-          <div class="signin-form">
-            ${SigninForm}          
-          </div>
+          </div>          
         `;
   }
 
   async postRender() {
-   // this.getCountryID();
+    // this.getCountryID();
     this.initializeElements();
     const {
       originInput,

@@ -1,3 +1,5 @@
+import SigninForm from "../templates/sign-form.js";
+
 const BookingForm = (
   countriesList,
   bookingOption,
@@ -97,7 +99,7 @@ const BookingForm = (
                     </div>
                   </div>
                    <div class="pt-3 d-flex justify-content-between">
-                      <a href="signin-form" class="btn btn-outline-dark btn-signin">Sign In</a>
+                      <button class="btn btn-outline-dark btn-signin">Sign In</button>
                       <button class="btn btn-checkout btn-dark">Checkout as a Guest</button>
                     </div>
                 </div>
@@ -105,6 +107,10 @@ const BookingForm = (
            </div>
         </div>        
     </section>
+
+    <div class="container-sm p-3 border mt-3 d-none" id="signin-form">
+        ${SigninForm}          
+    </div>
 
     <div class="section-header py-3 border-bottom border-secondary-subttle">
       <div class="card p-3">
