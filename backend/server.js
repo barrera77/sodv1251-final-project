@@ -8,62 +8,9 @@ import cors from "cors";
 import airportRoutes from "../backend/routes/city-airport-router.js";
 import nodemailer from "nodemailer";
 import passport from "passport";
+import { Strategy as LocalStrategy } from "passport-local";
+import bcrypt from "bcrypt";
 import session from "express-session";
-import initializePassport from "./passport-config.js";
-
-//#region Authentication
-
-initializePassport();
-
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Login route
-app.post("/login", (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ success: false, message: "An error occurred." });
-    }
-    if (!user) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials." });
-    }
-    req.logIn(user, (err) => {
-      if (err) {
-        return res
-          .status(500)
-          .json({ success: false, message: "Failed to log in." });
-      }
-      return res
-        .status(200)
-        .json({ success: true, message: "Login successful." });
-    });
-  })(req, res, next);
-});
-
-//logout route
-app.post("/logout", (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res
-        .status(500)
-        .json({ success: false, message: "Failed to log out." });
-    }
-    res.status(200).json({ success: true, message: "Logout successful." });
-  });
-});
-
-//#endregion
 
 //#region Flights API
 
@@ -72,6 +19,7 @@ const app = express();
 app.use(cors());
 config.api_key = process.env.API_KEY;
 app.use(express.json());
+
 app.get("/search?", async (req, res) => {
   const {
     departure_id,
@@ -310,6 +258,177 @@ app.post("/send-email", async (req, res) => {
   } catch (error) {
     console.error("Error sending email:", error);
     res.status(500).send("Failed to send email");
+  }
+});
+
+//#endregion
+
+//#region Authentication
+// Middleware for initializing passport
+
+// Configure session middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET, // Replace with a strong secret
+    resave: false, // Don't save session if it wasn't modified
+    saveUninitialized: false, // Don't create a session until something is stored
+    cookie: {
+      secure: false, // Set true if using HTTPS
+      maxAge: 1000 * 60 * 60 * 24, // 1-day session expiration
+    },
+  })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.serializeUser((user, done) => {
+  done(null, user.RegisteredUserID); // Store user ID in session
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input("id", mssql.Int, id)
+      .query("SELECT * FROM RegisteredUser WHERE RegisteredUserID = @id");
+    done(null, result.recordset[0]);
+  } catch (error) {
+    done(error, null);
+  }
+});
+
+passport.use(
+  new LocalStrategy(
+    { usernameField: "username", passwordField: "password" },
+    async (username, password, done) => {
+      try {
+        const pool = await poolPromise;
+        const result = await pool
+          .request()
+          .input("username", mssql.NVarChar, username)
+          .query("SELECT * FROM RegisteredUser WHERE Username = @username");
+
+        const user = result.recordset[0];
+        if (!user) {
+          return done(null, false, {
+            message: "Invalid username or password.",
+          });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.Password);
+        if (!isMatch) {
+          return done(null, false, {
+            message: "Invalid username or password.",
+          });
+        }
+
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
+);
+
+/* app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      console.error("Error during login:", err);
+      return res.status(500).json({ success: false, message: "Internal server error." });
+    }
+
+    if (!user) {
+      return res.status(401).json({ success: false, message: info.message || "Invalid credentials." });
+    }
+
+    req.login(user, (err) => {
+      if (err) {
+        console.error("Error during session setup:", err);
+        return res.status(500).json({ success: false, message: "Internal server error." });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Logged in successfully.",
+        user: {
+          id: user.RegisteredUserID,
+          username: user.Username,
+          email: user.Email,
+        },
+      });
+    });
+  })(req, res, next);
+}); */
+
+app.post("/login", (req, res, next) => {
+  passport.authenticate("local", (err, user, info) => {
+    if (err) {
+      console.error("Error during login:", err);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal server error." });
+    }
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({
+          success: false,
+          message: info.message || "Invalid credentials.",
+        });
+    }
+
+    req.login(user, (err) => {
+      if (err) {
+        console.error("Error during session setup:", err);
+        return res
+          .status(500)
+          .json({ success: false, message: "Internal server error." });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Logged in successfully.",
+        username: user.Username, // Return the username here
+      });
+    });
+  })(req, res, next);
+});
+
+app.post("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ message: "Error logging out." });
+    }
+    res.json({ message: "Logged out successfully." });
+  });
+});
+
+app.post("/register", async (req, res) => {
+  const { username, password, email } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const pool = await poolPromise;
+
+    const result = await pool
+      .request()
+      .input("username", mssql.NVarChar, username)
+      .input("password", mssql.NVarChar, hashedPassword)
+      .input("email", mssql.NVarChar, email)
+      .query(
+        "INSERT INTO RegisteredUser (Username, Password, Email) OUTPUT INSERTED.RegisteredUserID VALUES (@username, @password, @email)"
+      );
+
+    res.status(201).json({
+      message: "User registered successfully.",
+      userId: result.recordset[0].RegisteredUserID,
+    });
+  } catch (error) {
+    console.error("Error registering user:", error);
+    res.status(500).json({ message: "Error registering user." });
   }
 });
 

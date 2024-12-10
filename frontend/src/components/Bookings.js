@@ -1,7 +1,6 @@
 import BookingForm from "../templates/booking-form.js";
 import AbstractView from "./AbstractView.js";
 import { getData } from "../utils/api-utility.js";
-import SigninForm from "../templates/sign-form.js";
 import emailBody from "../templates/email-body.js";
 
 export default class extends AbstractView {
@@ -60,6 +59,9 @@ export default class extends AbstractView {
         this.countryNames
       );
     });
+
+    //login
+    await this.handleSignInForm();
   }
 
   initializeElements() {
@@ -85,8 +87,11 @@ export default class extends AbstractView {
       addedCheckedBaggage: document.querySelector(".added-checked-baggage"),
       iconCheckedBaggage: document.querySelector(".icon-checked-baggage"),
       iconSpecialBaggage: document.querySelector(".icon-special-baggage"),
-      signInForm: document.getElementById("signin-form"),
+      signInFormContainer: document.getElementById("signin-form-container"),
       logoutButton: document.querySelector(".btn-logout"),
+      btnSubmit: document.querySelector(".btn-submit"),
+      signInForm: document.getElementById("signin-form"),
+      usernameLabel: document.querySelector(".user-name-label"),
     };
 
     this.getBaggageDetails();
@@ -466,47 +471,66 @@ export default class extends AbstractView {
   }
 
   handleSignInButton() {
-    const { btnSignIn, signInForm } = this.domElements;
+    const { btnSignIn, signInFormContainer } = this.domElements;
 
     btnSignIn.addEventListener("click", (event) => {
       event.preventDefault();
-      signInForm.classList.remove("d-none");
-      signInForm.classList.add("d-block");
+      signInFormContainer.classList.remove("d-none");
+      signInFormContainer.classList.add("d-block");
     });
+    console.log(signInFormContainer);
   }
 
   handleSignInForm() {
-    const { signInForm, logoutButton } = this.domElements;
-    signInForm.addEventListener("submit", async (event) => {
-      event.preventDefault(); // Prevent the form from reloading the page
+    const { signInForm, logoutButton, signInFormContainer, usernameLabel } =
+      this.domElements;
 
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+    if (signInForm) {
+      signInForm.addEventListener("submit", async (event) => {
+        event.preventDefault(); // Prevent the default form submission behavior
 
-      try {
-        const response = await fetch("/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username, password }),
-        });
+        // Retrieve form values
+        const username = document.getElementById("username").value.trim();
+        const password = document.getElementById("password").value.trim();
 
-        const result = await response.json();
-
-        if (result.success) {
-          logoutButton.classList.add("d-block");
-          logoutButton.classList.remove("d-none");
-          alert("Login successful!");
-
-          // Hide the login form
-          signInForm.classList.remove("d-block");
-          signInForm.classList.add("d-none");
-        } else {
-          alert(result.message);
+        // Client-side validation
+        if (!username || !password) {
+          alert("Both username and password are required.");
+          return;
         }
-      } catch (error) {
-        console.error("Error during login:", error);
-      }
-    });
+
+        try {
+          // Make the login API request
+          const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            usernameLabel.textContent = result.username;
+
+            console.log("username:", result.success);
+            // On successful login
+            logoutButton.classList.add("d-block");
+            logoutButton.classList.remove("d-none");
+            alert("Login successful!");
+
+            // Optionally hide the sign-in form
+            signInFormContainer.classList.remove("d-block");
+            signInFormContainer.classList.add("d-none");
+          } else {
+            // Display error message on login failure
+            alert(result.message || "Invalid username or password.");
+          }
+        } catch (error) {
+          console.error("Error during login:", error);
+          alert("An error occurred during login. Please try again later.");
+        }
+      });
+    }
   }
 
   handleLogoutButton() {

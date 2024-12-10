@@ -25,7 +25,7 @@ const initializePassport = () => {
         const result = await pool
           .request()
           .input("username", mssql.NVarChar, username)
-          .query("SELECT * FROM Users WHERE username = @username");
+          .query("SELECT * FROM RegisteredUser WHERE Username = @username");
 
         if (result.recordset.length === 0) {
           return done(null, false, { message: "No user with that username." });
@@ -52,7 +52,7 @@ const initializePassport = () => {
       const result = await pool
         .request()
         .input("id", mssql.Int, id)
-        .query("SELECT * FROM Users WHERE id = @id");
+        .query("SELECT * FROM RegisteredUser WHERE RegisteredUserID = @id");
 
       if (result.recordset.length === 0) {
         return done(new Error("User not found"));
