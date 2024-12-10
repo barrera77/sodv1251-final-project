@@ -94,10 +94,20 @@ export default class extends AbstractView {
       btnSubmit: document.querySelector(".btn-submit"),
       signInForm: document.getElementById("signin-form"),
       usernameLabel: document.querySelector(".user-name-label"),
+      gotoRegistrationLink: document.querySelector(".link-registration"),
+      registerButtonContainer: document.getElementById(
+        "register-button-container"
+      ),
+      /* main registration fields */
+      invalidName: document.getElementById("invalid-name"),
+      invalidLastName: document.getElementById("invalid-last-name"),
+      invalidNationality: document.getElementById("invalid-nationality"),
+      invalidDate: document.getElementById("invalid-date"),
     };
 
     this.getBaggageDetails();
     this.handleSignInButton();
+    this.gotoRegister();
   }
 
   autocomplete(input, datalist, countryNames) {
@@ -367,36 +377,6 @@ export default class extends AbstractView {
     });
   }
 
-  /*  getCountryID(countryName) {
-    this.domElements.sendQueryButton =
-      document.querySelector(".btn-send-query");
-
-    this.domElements.sendQueryButton.addEventListener(
-      "click",
-      async (event) => {
-        event.preventDefault();
-
-        // Ensure that the country name is passed correctly in the URL
-        const countryResponse = await fetch(
-          `/query?countryName=${countryName}`, // Correct table name 'Country'
-          {
-            method: "GET", // Correct method
-            headers: { "Content-Type": "application/json" }, // Optional but keeps it consistent
-          }
-        );
-
-        if (!countryResponse.ok) {
-          throw new Error("Failed to get country ID");
-        }
-
-        // Log the response to check if the country result is received
-        const countryResult = await countryResponse.json();
-        console.log("Country Result:", countryResult); // Logs the country result
-        return countryResult;
-      }
-    );
-  } */
-
   /**
    * format dates
    * @param {*} date
@@ -536,7 +516,7 @@ export default class extends AbstractView {
   }
 
   handleLogoutButton() {
-    const { logoutButton, usernameLabel } = this.domElements;
+    const { logoutButton, usernameLabel, signInForm } = this.domElements;
 
     logoutButton.addEventListener("click", async () => {
       try {
@@ -552,6 +532,9 @@ export default class extends AbstractView {
           logoutButton.classList.remove("d-block");
           logoutButton.classList.add("d-none");
           usernameLabel.textContent = "";
+
+          //clear form
+          signInForm.reset();
         }
       } catch (error) {
         console.error("Error during logout:", error);
@@ -594,5 +577,41 @@ export default class extends AbstractView {
       console.error("Error:", error);
       alert("Error sending email.");
     }
+  }
+
+  gotoRegister() {
+    const {
+      gotoRegistrationLink,
+      registerButtonContainer,
+      nameInput,
+      invalidName,
+      lastNameInput,
+      invalidLastName,
+      nationalityInput,
+      invalidNationality,
+      selectDate,
+      invalidDate,
+    } = this.domElements;
+    gotoRegistrationLink.addEventListener("click", (event) => {
+      event.preventDefault(); // Prevent default anchor behavior
+
+      if (
+        nameInput.textContent === "" ||
+        lastNameInput.textContent === "" ||
+        nameInput.value === "" ||
+        selectDate.textContent === ""
+      ) {
+        invalidName.classList.add("d-block");
+        invalidLastName.classList.add("d-block");
+        invalidNationality.classList.add("d-block");
+        invalidDate.classList.add("d-block");
+      } else {
+        // Remove 'd-none' to show the element
+        registerButtonContainer.classList.remove("d-none");
+
+        // Optionally scroll into view
+        registerButtonContainer.scrollIntoView({ behavior: "smooth" });
+      }
+    });
   }
 }

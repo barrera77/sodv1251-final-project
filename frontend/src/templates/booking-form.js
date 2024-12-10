@@ -38,7 +38,7 @@ const BookingForm = (
       <div class="form-content margin mt-2">
            <div class="row">
              <div class="col-6">
-                <div class="card p-3">
+                <div class="card p-3 h-100">
                    <div class="d-flex justify-content-between align-items-center">
                       <div class=""><span>${
                         selectedFlightsData[0].type
@@ -96,16 +96,22 @@ const BookingForm = (
                       <span class="subdata">Includes taxes and carrier-imposed fees </span>
                     </div>
                   </div>
-                   <div class="pt-3 d-flex justify-content-between">
-                      <button class="btn btn-outline-dark btn-signin">Sign In</button>
-                      <button class="btn btn-checkout btn-dark">Checkout as a Guest</button>
+                   <div class="pt-3 row text-center">
+                      <div class="d-flex flex-column gap-1 col-6">
+                        <span class="fw-bold">Already a member?</span>
+                        <button class="btn btn-outline-dark btn-signin w-75 m-auto">Sign In</button>
+                      </div>
+                      <div class="d-flex flex-column gap-1 col-6">
+                        <span class="fw-bold">or</span>
+                        <button class="btn btn-checkout btn-dark w-75 m-auto">Checkout as a Guest</button>
+                      </div>
                     </div>
                 </div>
                 </div>              
            </div>
         </div>        
     </section>
-
+<!-- Login Form -->
     <div class="container-sm p-3 border mt-3 d-none" id="signin-form-container">
         <section class="vh-75">
   <div class="container py-3 h-100">
@@ -201,103 +207,134 @@ const BookingForm = (
       </div>
       <section class="border-bottom">
         <div class="form-content margin">
-          <div class="row">
-            <div class="col-6">
-              <div class="card p-3">
-                <div class="">
-                  <label for="name" class="form-label">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="name"
-                    aria-describedby="name"
-                  />
-                </div>
-                <div class="py-3">
-                  <label for="middle-name" class="form-label text-black-50">
-                    Middle Name (optional)
-                  </label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="middle-name"
-                    aria-describedby="middle-name"
-                  />
-                </div>
-                <div class="">
-                  <label for="last-name" class="form-label">
-                    Last Name
-                  </label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    id="last-name"
-                    aria-describedby="last-name"
-                  />
-                </div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="card p-3">
-                <div class="">
-                  <label for="nationality" class="form-label">
-                    Nationality
-                  </label>
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <i class="bi bi-globe-americas"></i>
-                    </span>
+          <div class="main-passenger-row">
+            <div class="row">
+              <div class="col-6">
+                <div class="card p-3">
+                  <div class="">
+                    <label for="name" class="form-label">
+                      Name
+                    </label>
                     <input
                       type="text"
                       class="form-control"
-                      list="nationality-options"
-                      id="nationality-input"
-                      aria-describedby="nationality-label"
+                      id="name"
+                      aria-describedby="name"
                     />
-                    <datalist id="nationality-options"></datalist>
+                    <div id="invalid-name" class="invalid-feedback">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="message">Invalid Name</span>
+                    </div>
                   </div>
-                </div>
-                <div class="py-3">
-                  <label for="gender" class="form-label">
-                    Gender
-                  </label>
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <i class="bi bi-gender-ambiguous"></i>
-                    </span>
-                    <select
+                  <div class="py-3">
+                    <label for="middle-name" class="form-label text-black-50">
+                      Middle Name (optional)
+                    </label>
+                    <input
                       type="text"
-                      class="form-control form-select"
-                      id="gender-input"
-                      aria-describedby="gender-label"
-                    >
-                      <option value="0">Select...</option>
-                      <option value="M">Male</option>
-                      <option value="F">Female</option>
-                    </select>
+                      class="form-control"
+                      id="middle-name"
+                      aria-describedby="middle-name"
+                    />
+                  </div>
+                  <div class="">
+                    <label for="last-name" class="form-label">
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="last-name"
+                      aria-describedby="last-name"
+                    />
+                    <div id="invalid-last-name" class="invalid-feedback">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="message">Invalid Last Name</span>
+                    </div>
                   </div>
                 </div>
+              </div>
+              <div class="col-6">
+                <div class="card p-3">
+                  <div class="">
+                    <label for="nationality" class="form-label">
+                      Nationality
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-globe-americas"></i>
+                      </span>
+                      <input
+                        type="text"
+                        class="form-control"
+                        list="nationality-options"
+                        id="nationality-input"
+                        aria-describedby="nationality-label"
+                      />
+                      <div id="invalid-nationality" class="invalid-feedback">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="message">Invalid Nationality</span>
+                      </div>
+                      <datalist id="nationality-options"></datalist>
+                    </div>
+                  </div>
+                  <div class="py-3">
+                    <label for="gender" class="form-label">
+                      Gender
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi bi-gender-ambiguous"></i>
+                      </span>
+                      <select
+                        type="text"
+                        class="form-control form-select"
+                        id="gender-input"
+                        aria-describedby="gender-label"
+                      >
+                        <option value="0">Select...</option>
+                        <option value="M">Male</option>
+                        <option value="F">Female</option>
+                      </select>
+                    </div>
+                  </div>
 
-                <div class="">
-                  <label for="birth-date" class="form-label">
-                    Date of Birth
-                  </label>
-                  <div class="input-group">
-                    <span class="input-group-text">
-                      <i class="bi-calendar"></i>
-                    </span>
-                    <input
-                      type="date"
-                      class="form-control"
-                      id="birth-date"
-                      aria-describedby="birth-date-label"
-                    />
+                  <div class="">
+                    <label for="birth-date" class="form-label">
+                      Date of Birth
+                    </label>
+                    <div class="input-group">
+                      <span class="input-group-text">
+                        <i class="bi-calendar"></i>
+                      </span>
+                      <input
+                        type="date"
+                        class="form-control"
+                        id="birth-date"
+                        aria-describedby="birth-date-label"
+                      />
+                       <div id="invalid-date" class="invalid-feedback">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <span id="message">Invalid Date</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+             <div class="registration-additional- py-3">
+             <div
+              class="border-start-5 alert alert-info d-flex align-items-center"
+              role="alert"
+            >
+              <i class="bi bi-info-circle-fill me-3"></i>
+                <span>Want to <a href="#register-button-container" class="link-registration fw-bold">register</a> for a better experience?</span>                      
+
+            </div>
+              
+             </div>
+
+                    
           </div>
         </div>
         <div class="pt-4">
@@ -472,6 +509,11 @@ const BookingForm = (
               </div>
             </div>
           </div>
+          
+              <div class="w-50 m-auto pt-3 d-none" id="register-button-container">
+                <button class="btn btn-dark btn-register w-100">Register</button>
+              </div>
+             
         </div>
       </section>      
     </div>
