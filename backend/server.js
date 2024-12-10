@@ -372,12 +372,10 @@ app.post("/login", (req, res, next) => {
     }
 
     if (!user) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          message: info.message || "Invalid credentials.",
-        });
+      return res.status(401).json({
+        success: false,
+        message: info.message || "Invalid credentials.",
+      });
     }
 
     req.login(user, (err) => {
@@ -400,9 +398,23 @@ app.post("/login", (req, res, next) => {
 app.post("/logout", (req, res) => {
   req.logout((err) => {
     if (err) {
-      return res.status(500).json({ message: "Error logging out." });
+      return res
+        .status(500)
+        .json({ success: false, message: "Error logging out." });
     }
-    res.json({ message: "Logged out successfully." });
+
+    req.session.destroy((err) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ success: false, message: "Error destroying session." });
+      }
+
+      res.clearCookie("connect.sid"); // Clear the session cookie
+      return res
+        .status(200)
+        .json({ success: true, message: "Logged out successfully." });
+    });
   });
 });
 

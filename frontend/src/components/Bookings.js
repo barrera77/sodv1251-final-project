@@ -62,6 +62,8 @@ export default class extends AbstractView {
 
     //login
     await this.handleSignInForm();
+
+    this.handleLogoutButton();
   }
 
   initializeElements() {
@@ -534,7 +536,9 @@ export default class extends AbstractView {
   }
 
   handleLogoutButton() {
-    this.domElements.logoutButton.addEventListener("click", async () => {
+    const { logoutButton, usernameLabel } = this.domElements;
+
+    logoutButton.addEventListener("click", async () => {
       try {
         const response = await fetch("/logout", {
           method: "POST",
@@ -544,11 +548,14 @@ export default class extends AbstractView {
         const result = await response.json();
 
         if (result.success) {
+          alert("Logout succesful.");
           logoutButton.classList.remove("d-block");
           logoutButton.classList.add("d-none");
+          usernameLabel.textContent = "";
         }
       } catch (error) {
         console.error("Error during logout:", error);
+        alert("An error occurred during logout. Please try again later.");
       }
     });
   }
