@@ -46,7 +46,8 @@ export default class extends AbstractView {
     await this.fetchCountriesData();
     this.initializeElements();
     this.handleFormData();
-    const { nationalityInput, nationalityOptions } = this.domElements;
+    const { nationalityInput, formInputs, nationalityOptions } =
+      this.domElements;
 
     /*   document.body.addEventListener("change", () => {
       clearTimeout(this.autocompleteTimeoutHandle);
@@ -64,6 +65,20 @@ export default class extends AbstractView {
     await this.handleSignInForm();
 
     this.handleLogoutButton();
+
+    /**
+     * Add event listeners to all inputs to handle feedback messages
+     */
+    formInputs.forEach((input) => {
+      input.addEventListener("input", () => {
+        const inputId = input.id;
+        const messageElement = document.getElementById(`invalid-${inputId}`);
+
+        if (input.value) {
+          messageElement.classList.remove("d-block");
+        }
+      });
+    });
   }
 
   initializeElements() {
@@ -71,10 +86,10 @@ export default class extends AbstractView {
       nameInput: document.getElementById("name"),
       middleNameInput: document.getElementById("middle-name"),
       lastNameInput: document.getElementById("last-name"),
-      selectGender: document.getElementById("gender-input"),
+      selectGender: document.getElementById("gender"),
       selectDate: document.getElementById("birth-date"),
       nationalityOptions: document.getElementById("nationality-options"),
-      nationalityInput: document.getElementById("nationality-input"),
+      nationalityInput: document.getElementById("nationality"),
       selectDialCode: document.querySelector(".select-dial-code"),
       btnCheckOut: document.querySelector(".btn-checkout"),
       btnSignIn: document.querySelector(".btn-signin"),
@@ -92,22 +107,35 @@ export default class extends AbstractView {
       signInFormContainer: document.getElementById("signin-form-container"),
       logoutButton: document.querySelector(".btn-logout"),
       btnSubmit: document.querySelector(".btn-submit"),
-      signInForm: document.getElementById("signin-form"),
+      logInForm: document.getElementById("signin-form"),
+      logInUsernameInput: document.getElementById("login-username"),
+      logInPasswordInput: document.getElementById("login-password"),
       usernameLabel: document.querySelector(".user-name-label"),
       gotoRegistrationLink: document.querySelector(".link-registration"),
       registerButtonContainer: document.getElementById(
         "register-button-container"
       ),
-      /* main registration fields */
+      registrationSuggestion: document.querySelector(
+        ".registration-suggestion"
+      ),
+      usernameInput: document.getElementById("username"),
+      passwordInput: document.getElementById("password"),
+
+      btnRegister: document.querySelector(".btn-register"),
       invalidName: document.getElementById("invalid-name"),
       invalidLastName: document.getElementById("invalid-last-name"),
       invalidNationality: document.getElementById("invalid-nationality"),
-      invalidDate: document.getElementById("invalid-date"),
+      invalidDate: document.getElementById("invalid-birth-date"),
+      invalidEmail: document.getElementById("invalid-email"),
+      invalidUsername: document.getElementById("invalid-username"),
+      invalidPassword: document.getElementById("invalid-password"),
+      formInputs: document.querySelectorAll("input"),
     };
 
     this.getBaggageDetails();
     this.handleSignInButton();
     this.gotoRegister();
+    this.registerUser();
   }
 
   autocomplete(input, datalist, countryNames) {
@@ -167,8 +195,6 @@ export default class extends AbstractView {
       selectDialCode,
       phoneInput,
     } = this.domElements;
-
-    //btnCheckOut = document.querySelector(".btn-checkout");
 
     btnCheckOut.addEventListener("click", async (event) => {
       event.preventDefault();
@@ -495,16 +521,16 @@ export default class extends AbstractView {
             usernameLabel.textContent = result.username;
 
             console.log("username:", result.success);
-            // On successful login
+           
             logoutButton.classList.add("d-block");
             logoutButton.classList.remove("d-none");
             alert("Login successful!");
 
-            // Optionally hide the sign-in form
+       
             signInFormContainer.classList.remove("d-block");
             signInFormContainer.classList.add("d-none");
           } else {
-            // Display error message on login failure
+        
             alert(result.message || "Invalid username or password.");
           }
         } catch (error) {
@@ -516,7 +542,8 @@ export default class extends AbstractView {
   }
 
   handleLogoutButton() {
-    const { logoutButton, usernameLabel, signInForm } = this.domElements;
+    const { logoutButton, usernameLabel, registrationSuggestion, signInForm } =
+      this.domElements;
 
     logoutButton.addEventListener("click", async () => {
       try {
@@ -532,6 +559,9 @@ export default class extends AbstractView {
           logoutButton.classList.remove("d-block");
           logoutButton.classList.add("d-none");
           usernameLabel.textContent = "";
+
+          registrationSuggestion.classList.remove("d-none");
+          registrationSuggestion.classList.add("d-block");
 
           //clear form
           signInForm.reset();
@@ -596,10 +626,10 @@ export default class extends AbstractView {
       event.preventDefault(); // Prevent default anchor behavior
 
       if (
-        nameInput.textContent === "" ||
-        lastNameInput.textContent === "" ||
-        nameInput.value === "" ||
-        selectDate.textContent === ""
+        nameInput.value.trim() === "" ||
+        lastNameInput.value.trim() === "" ||
+        selectDate.value.trim() === "" ||
+        !selectDate.value
       ) {
         invalidName.classList.add("d-block");
         invalidLastName.classList.add("d-block");
@@ -608,10 +638,88 @@ export default class extends AbstractView {
       } else {
         // Remove 'd-none' to show the element
         registerButtonContainer.classList.remove("d-none");
+        registerButtonContainer.classList.add("d-block");
 
         // Optionally scroll into view
         registerButtonContainer.scrollIntoView({ behavior: "smooth" });
       }
     });
+  }
+
+  registerUser() {
+    const {
+      btnRegister,
+      emailInput,
+      usernameInput,
+      passwordInput,
+      invalidUsername,
+      invalidEmail,
+      invalidPassword,
+      registerButtonContainer,
+    } = this.domElements;
+
+    let registeredUser;
+
+    if (usernameInput && passwordInput) {
+      // Avoid attaching multiple listeners
+      btnRegister.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        console.log("usernameInput value:", usernameInput?.value);
+        console.log("emailInput value:", emailInput?.value);
+        console.log("passwordInput value:", passwordInput?.value);
+
+        if (
+          usernameInput.value.trim() === "" ||
+          passwordInput.value.trim() === "" ||
+          emailInput.value.trim() === ""
+        ) {
+          invalidEmail.classList.add("d-block");
+          invalidUsername.classList.add("d-block");
+          invalidPassword.classList.add("d-block");
+          return; // Stop further execution if inputs are invalid
+        }
+
+        // Create RegisteredUser object
+        registeredUser = {
+          username: usernameInput?.value.trim(),
+          password: passwordInput?.value.trim(),
+          email: emailInput?.value.trim(),
+        };
+
+        try {
+          const response = await fetch("/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(registeredUser),
+          });
+
+          const result = await response.json();
+          console.log("Server Response:", result); // Log the full response
+
+          if (result.success) {
+            //clear the form
+            console.log("usernameInput: ", usernameInput);
+            usernameInput.textContent = "";
+            passwordInput.textContent = "";
+
+            //hide the form
+            registerButtonContainer.classList.remove("d-block");
+            registerButtonContainer.classList.add("d-none");
+
+            alert(
+              "Registration successful. Please sign in for a better experience"
+            );
+          } else {
+            alert(result.message || "Registration failed. Please try again.");
+          }
+        } catch (error) {
+          console.error("Error during registration:", error);
+          alert(
+            "An error occurred during registration. Please try again later."
+          );
+        }
+      });
+    }
   }
 }

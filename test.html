@@ -1,32 +1,12 @@
-const BookingForm = (
-  countriesList,
-  bookingOption,
-  bookingData,
-  selectedFlightsData
-) => {
-  let tax = bookingOption.price * 0.05;
-  let subtotal = bookingOption.price - tax;
-  let adults = bookingData.adults || 0;
-  let children = bookingData.children || 0;
-  let infants = bookingData.infants_in_seat || 0;
-  let flightsLength = selectedFlightsData[0].flights.length;
-  let numOfPassengers =
-    parseInt(adults) + parseInt(children) + parseInt(infants);
-
-  let departureDate = formatDate(
-    selectedFlightsData[0].flights[0].departure_airport.time
-  );
-  let arrivalDate = "";
-  selectedFlightsData[0].flights.length > 1
-    ? (arrivalDate = formatDate(
-        selectedFlightsData[1].flights[0].departure_airport.time
-      ))
-    : (arrivalDate = formatDate(
-        selectedFlightsData[1].flights[0].departure_airport.time
-      ));
-
-  return ` 
-<div class="container-sm p-3 border flight-booking">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="container-sm p-3 border flight-booking">
       <div class="card p-3">
         <div class="row">
           <div>
@@ -41,7 +21,7 @@ const BookingForm = (
               <div class="card p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                   <div class="">
-                    <span>${selectedFlightsData[0].type}</span
+                    <span>${ selectedFlightsData[0].type }</span
                     ><span>
                       - <span>${numOfPassengers}</span> passenger(s)</span
                     >
@@ -57,11 +37,10 @@ const BookingForm = (
                     <div class="data">
                       <span class="fw-bold"
                         >${
-                          selectedFlightsData[0].flights[0].departure_airport
-                            .name
+                        selectedFlightsData[0].flights[0].departure_airport.name
                         } - ${
-    selectedFlightsData[0].flights[0].departure_airport.id
-  }</span
+                        selectedFlightsData[0].flights[0].departure_airport.id
+                        }</span
                       >
                     </div>
                     <div class="subdata">
@@ -71,17 +50,13 @@ const BookingForm = (
                   <div class="card p-3 mt-3">
                     <div class="data">
                       <span class="fw-bold"
-                        >${
-                          selectedFlightsData[0].flights.length > 1
-                            ? selectedFlightsData[0].flights[1].arrival_airport
-                                .name
-                            : selectedFlightsData[0].flights[0].arrival_airport
-                                .name
-                        } - ${
-    selectedFlightsData[0].flights.length > 1
-      ? selectedFlightsData[0].flights[1].arrival_airport.id
-      : selectedFlightsData[0].flights[0].arrival_airport.id
-  }</span
+                        >${ selectedFlightsData[0].flights.length > 1 ?
+                        selectedFlightsData[0].flights[1].arrival_airport .name
+                        : selectedFlightsData[0].flights[0].arrival_airport
+                        .name } - ${ selectedFlightsData[0].flights.length > 1 ?
+                        selectedFlightsData[0].flights[1].arrival_airport.id :
+                        selectedFlightsData[0].flights[0].arrival_airport.id
+                        }</span
                       >
                     </div>
                     <div class="subdata">${arrivalDate}</div>
@@ -99,13 +74,13 @@ const BookingForm = (
                   <div class="row py-3">
                     <div class="col-6">Taxes and fees</div>
                     <div class="col-6">
-                      <span>CAD $${tax.toFixed(2)}</span>
+                      <span>CAD $${tax.toFixed( 2 )}</span>
                     </div>
                   </div>
                   <div class="row pb-2">
                     <div class="col-6">Total</div>
                     <div class="col-6">
-                      <span>CAD $${bookingOption.price}</span>
+                      <span>CAD $${ bookingOption.price }</span>
                     </div>
                   </div>
                   <div>
@@ -509,21 +484,14 @@ const BookingForm = (
                     <select
                       class="form-select input-group-text select-dial-code"
                     >
-                      ${countriesList
-                        .map((country) => {
-                          const suffix =
-                            country.idd &&
-                            country.idd.suffixes &&
-                            country.idd.suffixes.length > 0
-                              ? country.idd.suffixes[0]
-                              : "";
-                          return `
+                      ${countriesList .map((country) => { const suffix =
+                      country.idd && country.idd.suffixes &&
+                      country.idd.suffixes.length > 0 ? country.idd.suffixes[0]
+                      : ""; return `
                       <option value="${country.idd.root}" class="country-codes">
                         ${country.name.common} (${country.idd.root}${suffix})
                       </option>
-                      `;
-                        })
-                        .join()}
+                      `; }) .join()}
                     </select>
                     <input
                       type="text"
@@ -612,25 +580,6 @@ const BookingForm = (
           </div>
         </section>
       </div>
-    </div>`;
-};
-
-function formatDate(dateString) {
-  const date = new Date(dateString);
-
-  return (
-    date.toLocaleDateString("en-US", {
-      weekday: "long", // Full weekday name
-      day: "numeric", // Numeric day of the month
-      month: "long", // Full month name
-      year: "numeric", // Full year
-    }) +
-    ` - ${date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    })}`
-  );
-}
-
-export default BookingForm;
+    </div>
+  </body>
+</html>
