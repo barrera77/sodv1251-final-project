@@ -1,3 +1,5 @@
+
+
 -- Create the database
 CREATE DATABASE BVC_Airlines_DB;
 GO
@@ -18,6 +20,17 @@ CREATE TABLE Booking (
     CONSTRAINT CHK_ArrivalDate CHECK (ArrivalDate >= DepartureDate)
 );
 
+-- User Table
+CREATE TABLE RegisteredUser (
+    RegisteredUserID INT IDENTITY(1,1) PRIMARY KEY,               
+    Username NVARCHAR(100) NOT NULL UNIQUE,            
+    Password NVARCHAR(255) NOT NULL,                  
+    Email NVARCHAR(255) NOT NULL UNIQUE,               
+    DateCreated DATETIME NOT NULL DEFAULT GETDATE(),   
+    IsActive BIT NOT NULL DEFAULT 1                    
+);
+GO
+
 -- Passenger Table
 CREATE TABLE Passenger (
     PassengerID INT IDENTITY(1,1) PRIMARY KEY,
@@ -27,12 +40,14 @@ CREATE TABLE Passenger (
     LastName NVARCHAR(100) NOT NULL,
     CountryID INT NOT NULL,
     Gender CHAR(1) CHECK (Gender IN ('M', 'F')),
-    DateOfBirth DATE NOT NULL,
-	IsRegistered BIT NOT NULL,
-	RegisteredOn DATETIME NULL,
-	CONSTRAINT FK_Passenger_Booking FOREIGN KEY (BookingID) REFERENCES Booking(BookingID)
+    DateOfBirth DATE NOT NULL,	
+	RegisteredUserID INT NULL,
+	CONSTRAINT FK_Passenger_Booking FOREIGN KEY (BookingID) REFERENCES Booking(BookingID),
+	CONSTRAINT FK_Passenger_User FOREIGN KEY (RegisteredUserID) REFERENCES RegisteredUser(RegisteredUserID)
 	);
 	GO
+
+
 
 -- Flight Table
 CREATE TABLE Flight (

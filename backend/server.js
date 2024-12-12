@@ -13,7 +13,6 @@ import bcrypt from "bcrypt";
 import session from "express-session";
 
 //#region Flights API
-
 dotenv.config();
 const app = express();
 app.use(cors());

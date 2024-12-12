@@ -45,7 +45,7 @@ export default class extends AbstractView {
   async postRender() {
     await this.fetchCountriesData();
     this.initializeElements();
-    this.handleFormData();
+
     const { nationalityInput, formInputs, nationalityOptions } =
       this.domElements;
 
@@ -61,18 +61,13 @@ export default class extends AbstractView {
       );
     });
 
-    //login
-    await this.handleSignInForm();
-
-    this.handleLogoutButton();
-
     /**
      * Add event listeners to all inputs to handle feedback messages
      */
     formInputs.forEach((input) => {
       input.addEventListener("input", () => {
         const inputId = input.id;
-        const messageElement = document.querySelector(`.invalid-${inputId}`);
+        const messageElement = document.querySelector(`#invalid-${inputId}`);
 
         if (input.value && messageElement) {
           messageElement.classList.remove("d-block");
@@ -131,11 +126,13 @@ export default class extends AbstractView {
       invalidPassword: document.getElementById("invalid-password"),
       formInputs: document.querySelectorAll("input"),
     };
-
     this.getBaggageDetails();
     this.handleSignInButton();
+    this.handleSignInForm();
     this.gotoRegister();
     this.registerUser();
+    this.handleLogoutButton();
+    this.handleFormData();
   }
 
   autocomplete(input, datalist, countryNames) {
@@ -183,7 +180,7 @@ export default class extends AbstractView {
   /* TODO: make this the main function to handle the form
    * and add fields validation
    */
-  handleFormData() {
+  handleFormData(userId) {
     const {
       btnCheckOut,
       nameInput,
@@ -194,6 +191,7 @@ export default class extends AbstractView {
       selectDate,
       selectDialCode,
       phoneInput,
+      emailInput,
     } = this.domElements;
 
     btnCheckOut.addEventListener("click", async (event) => {
@@ -281,6 +279,7 @@ export default class extends AbstractView {
           CountryID: countryID,
           Gender: selectGender.value,
           DateOfBirth: selectDate.value,
+          RegisterUserID: userId,
         };
 
         const passengerResponse = await fetch("/query/Passenger", {
@@ -381,7 +380,7 @@ export default class extends AbstractView {
           PassengerID: passengerID,
           PhoneType: "Mobile",
           PhoneNumber: `${selectDialCode.value} ${phoneInput.value}`,
-          Email: "john.doe@example.ca",
+          Email: emailInput.value,
         };
 
         const contactResponse = await fetch("/query/Contact", {
@@ -497,6 +496,8 @@ export default class extends AbstractView {
   handleSignInForm() {
     const {
       logInForm,
+      logInUsernameInput,
+      logInPasswordInput,
       logoutButton,
       signInFormContainer,
       registrationSuggestion,
@@ -509,45 +510,44 @@ export default class extends AbstractView {
       logInForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const username = document.getElementById("login-username").value.trim();
-        const password = document.getElementById("login-password").value.trim();
+        const username = logInUsernameInput.value.trim();
+        const password = logInPasswordInput.value.trim();
 
-        if (!username || !password) {
+        if (password === "" || username === "") {
           alert("Both username and password are required.");
-          return;
-        }
+        } else {
+          try {
+            // Make the login API request
+            const response = await fetch("/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username, password }),
+            });
 
-        try {
-          // Make the login API request
-          const response = await fetch("/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password }),
-          });
+            const result = await response.json();
 
-          const result = await response.json();
+            if (result.success) {
+              usernameLabel.textContent = result.username;
 
-          if (result.success) {
-            usernameLabel.textContent = result.username;
+              console.log("username:", result.success);
 
-            console.log("username:", result.success);
+              logoutButton.classList.add("d-block");
+              logoutButton.classList.remove("d-none");
+              alert("Login successful!");
 
-            logoutButton.classList.add("d-block");
-            logoutButton.classList.remove("d-none");
-            alert("Login successful!");
+              signInFormContainer.classList.remove("d-block");
+              signInFormContainer.classList.add("d-none");
 
-            signInFormContainer.classList.remove("d-block");
-            signInFormContainer.classList.add("d-none");
-
-            registrationSuggestion.classList.add("d-none");
-            btnCheckOut.textContent = "Checkout";
-            btnSignIn.disabled = true;
-          } else {
-            alert(result.message || "Invalid username or password.");
+              registrationSuggestion.classList.add("d-none");
+              btnCheckOut.textContent = "Checkout";
+              btnSignIn.disabled = true;
+            } else {
+              alert(result.message || "Invalid username or password.");
+            }
+          } catch (error) {
+            console.error("Error during login:", error);
+            alert("An error occurred during login. Please try again later.");
           }
-        } catch (error) {
-          console.error("Error during login:", error);
-          alert("An error occurred during login. Please try again later.");
         }
       });
     }
@@ -719,18 +719,21 @@ export default class extends AbstractView {
           console.log("Server Response:", result); // Log the full response
 
           if (result.success) {
-            //clear the form
-            console.log("usernameInput: ", usernameInput);
-            usernameInput.textContent = "";
-            passwordInput.textContent = "";
-
-            //hide the form
-            registerButtonContainer.classList.remove("d-block");
-            registerButtonContainer.classList.add("d-none");
+            let userId = result.userId;
 
             alert(
               "Registration successful. Please sign in for a better experience"
             );
+
+            //clear the form
+            console.log("usernameInput: ", usernameInput);
+            usernameInput.value = "";
+            passwordInput.value = "";
+
+            //hide the form
+            registerButtonContainer.classList.remove("d-block");
+            registerButtonContainer.classList.add("d-none");
+            return result.userId;
           } else {
             alert(result.message || "Registration failed. Please try again.");
           }
@@ -739,6 +742,7 @@ export default class extends AbstractView {
           alert(
             "An error occurred during registration. Please try again later."
           );
+          return null;
         }
       });
     }
