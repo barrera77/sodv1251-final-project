@@ -86,6 +86,15 @@ section {
   text-transform: uppercase;
 }
 
+.btn-logout {
+  font-size: 1.25rem !important;
+}
+
+.btn-logout:hover {
+  font-weight: bold;
+  color: var(--white) !important;
+}
+
 /* hero */
 .hero {
   position: relative;

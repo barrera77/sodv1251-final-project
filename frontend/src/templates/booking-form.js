@@ -167,7 +167,7 @@ const BookingForm = (
                             class="invalid-feedback text-dark"
                           >
                             <i class="bi bi-exclamation-triangle"></i>
-                            <span>Invalid Username</span>
+                            <span class="">Invalid Username</span>
                           </div>
                         </div>
 

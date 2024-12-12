@@ -7,6 +7,7 @@ export default class extends AbstractView {
   }
 
   async getHtml() {
+    let name = JSON.parse(localStorage.getItem("name"));
     let bookingData = JSON.parse(localStorage.getItem("booking-data")) || "";
     let selectedFlightsData = JSON.parse(
       localStorage.getItem("selected-flights-data")
@@ -54,7 +55,7 @@ export default class extends AbstractView {
 
                 <div class="card p-3">
                     <div class="border-bottom border-secondary-subttle">
-                        <p>Hi <span>Customer Name</span></p>
+                        <p>Hi <span>${name}</span></p>
                         <p>Travel can be complicated. To keep things simple, we've gathered all the details about your upcoming flight in one place.</p>
                     </div>
                     <div class="border-bottom border-secondary-subttle" >

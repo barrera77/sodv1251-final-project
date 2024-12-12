@@ -72,9 +72,9 @@ export default class extends AbstractView {
     formInputs.forEach((input) => {
       input.addEventListener("input", () => {
         const inputId = input.id;
-        const messageElement = document.getElementById(`invalid-${inputId}`);
+        const messageElement = document.querySelector(`.invalid-${inputId}`);
 
-        if (input.value) {
+        if (input.value && messageElement) {
           messageElement.classList.remove("d-block");
         }
       });
@@ -94,7 +94,7 @@ export default class extends AbstractView {
       btnCheckOut: document.querySelector(".btn-checkout"),
       btnSignIn: document.querySelector(".btn-signin"),
       phoneTypeInput: document.getElementById("phone-type"),
-      phoneInput: document.getElementById("phone-number-input"),
+      phoneInput: document.getElementById("phone-number"),
       emailInput: document.getElementById("email"),
       btnAddCheckedBaggage: document.querySelector(".btn-add-checked-baggage"),
       btnAddSpecialBaggage: document.querySelector(".btn-add-special-baggage"),
@@ -281,8 +281,6 @@ export default class extends AbstractView {
           CountryID: countryID,
           Gender: selectGender.value,
           DateOfBirth: selectDate.value,
-          IsRegistered: 1,
-          RegisteredOn: "2000-11-22",
         };
 
         const passengerResponse = await fetch("/query/Passenger", {
@@ -296,6 +294,10 @@ export default class extends AbstractView {
 
         const passengerResult = await passengerResponse.json();
         console.log("Passenger inserted successfully:", passengerResult);
+
+        // Save passenger name to local storage
+        const name = nameInput.value;
+        localStorage.setItem("name", JSON.stringify(name));
 
         const passengerID = passengerResult.PassengerID;
         if (!passengerID) throw new Error("PassengerID not returned");
@@ -374,7 +376,6 @@ export default class extends AbstractView {
           }
         }
 
-        console.log(`${selectDialCode.value} ${phoneInput.value}`);
         // Insert Contact
         const contactData = {
           PassengerID: passengerID,
@@ -400,6 +401,11 @@ export default class extends AbstractView {
       }
 
       this.sendBookingConfirmation();
+
+      alert("Transaction Complete");
+
+      // Redirect to booking confirmation page
+      window.location.href = "/booking-confirmation";
     });
   }
 
@@ -423,7 +429,6 @@ export default class extends AbstractView {
       Gender: document.getElementById("gender-input").value,
       DateOfBirth: document.getElementById("birth-date").value,
       isRegistered: registration,
-      RegisteredOn: "",
     };
   }
 
@@ -490,18 +495,23 @@ export default class extends AbstractView {
   }
 
   handleSignInForm() {
-    const { signInForm, logoutButton, signInFormContainer, usernameLabel } =
-      this.domElements;
+    const {
+      logInForm,
+      logoutButton,
+      signInFormContainer,
+      registrationSuggestion,
+      usernameLabel,
+      btnCheckOut,
+      btnSignIn,
+    } = this.domElements;
 
-    if (signInForm) {
-      signInForm.addEventListener("submit", async (event) => {
-        event.preventDefault(); // Prevent the default form submission behavior
+    if (logInForm) {
+      logInForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-        // Retrieve form values
-        const username = document.getElementById("username").value.trim();
-        const password = document.getElementById("password").value.trim();
+        const username = document.getElementById("login-username").value.trim();
+        const password = document.getElementById("login-password").value.trim();
 
-        // Client-side validation
         if (!username || !password) {
           alert("Both username and password are required.");
           return;
@@ -521,16 +531,18 @@ export default class extends AbstractView {
             usernameLabel.textContent = result.username;
 
             console.log("username:", result.success);
-           
+
             logoutButton.classList.add("d-block");
             logoutButton.classList.remove("d-none");
             alert("Login successful!");
 
-       
             signInFormContainer.classList.remove("d-block");
             signInFormContainer.classList.add("d-none");
+
+            registrationSuggestion.classList.add("d-none");
+            btnCheckOut.textContent = "Checkout";
+            btnSignIn.disabled = true;
           } else {
-        
             alert(result.message || "Invalid username or password.");
           }
         } catch (error) {
@@ -542,8 +554,14 @@ export default class extends AbstractView {
   }
 
   handleLogoutButton() {
-    const { logoutButton, usernameLabel, registrationSuggestion, signInForm } =
-      this.domElements;
+    const {
+      logoutButton,
+      btnCheckOut,
+      usernameLabel,
+      registrationSuggestion,
+      logInForm,
+      btnSignIn,
+    } = this.domElements;
 
     logoutButton.addEventListener("click", async () => {
       try {
@@ -560,11 +578,14 @@ export default class extends AbstractView {
           logoutButton.classList.add("d-none");
           usernameLabel.textContent = "";
 
+          btnCheckOut.textContent = "Checkout as a Guest";
+          btnSignIn.disabled = false;
+
           registrationSuggestion.classList.remove("d-none");
           registrationSuggestion.classList.add("d-block");
 
           //clear form
-          signInForm.reset();
+          logInForm.reset();
         }
       } catch (error) {
         console.error("Error during logout:", error);
