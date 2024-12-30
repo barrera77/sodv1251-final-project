@@ -1,0 +1,33 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5002:5002"
+    environment:
+      - NODE_ENV=production
+      - API_KEY=cd1be76762957b88ef90179251e512cd6d1e9c7fb588ff36e02f5ae98f1fde30
+      - MSSQL_USER_NAME=sa
+      - MSSQL_PASSWORD="B@rrer@#77"
+      - SENDER_USERNAME=myprojects.manuel@gmail.com
+      - SENDER_PASSWORD=rglj guud nknq tfab
+      - SESSION_SECRET=mySuperSecretKey
+      - CR_PAT=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
+      - PORT=1000
+    depends_on:
+      - db
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: ${MSSQL_PASSWORD}
+      ACCEPT_EULA: "Y"
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+      - .:/app
+      - /app/node_modules
+volumes:
+  sqlserverdata:

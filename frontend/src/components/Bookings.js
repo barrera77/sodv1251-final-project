@@ -700,6 +700,7 @@ export default class extends AbstractView {
           invalidPassword.classList.add("d-block");
           return; // Stop further execution if inputs are invalid
         }
+        
 
         // Create RegisteredUser object
         registeredUser = {
