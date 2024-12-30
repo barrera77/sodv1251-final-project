@@ -13,7 +13,7 @@ services:
       - SENDER_USERNAME=myprojects.manuel@gmail.com
       - SENDER_PASSWORD=rglj guud nknq tfab
       - SESSION_SECRET=mySuperSecretKey
-      - CR_PAT=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
+      - CR_PAT=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
       - PORT=1000
     depends_on:
       - db
