@@ -1,33 +1,20 @@
 services:
   app:
+    container_name: app-container
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "5002:5002"
     environment:
       - NODE_ENV=${NODE_ENV}
       - API_KEY=${API_KEY}
-      - MSSQL_USER_NAME=${MSSQL_USER_NAME}
-      - MSSQL_PASSWORD=${MSSQL_PASSWORD}
+      - MSSQL_USER_NAME=${MSSQL_USER_NAME} # Your Azure SQL username
+      - MSSQL_PASSWORD=${MSSQL_PASSWORD}  # Your Azure SQL password
+      - MSSQL_SERVER=${MSSQL_SERVER}      # Your Azure SQL server name (e.g., your-server.database.windows.net)
+      - MSSQL_DATABASE=${MSSQL_DATABASE}  # Your Azure SQL database name
       - SENDER_USERNAME=${SENDER_USERNAME}
       - SENDER_PASSWORD=${SENDER_PASSWORD}
       - SESSION_SECRET=${SESSION_SECRET}
       - CR_PAT=${CR_PAT}
-      - PORT=${PORT}
-    depends_on:
-      - db
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
+      - PORT=${APP_PORT}
     ports:
-      - "1433:1433"
-    environment:
-      SA_PASSWORD: ${MSSQL_PASSWORD}
-      ACCEPT_EULA: "Y"
-    volumes:
-      - sqlserverdata:/var/opt/mssql
-      - .:/app
-      - /app/node_modules
-volumes:
-  sqlserverdata:
+      - "5006:5006"

@@ -12,6 +12,10 @@ import { Strategy as LocalStrategy } from "passport-local";
 import bcrypt from "bcrypt";
 import session from "express-session";
 
+import { configMssql } from "./db-config.js";
+import { readData } from "./getData.js";
+
+
 //#region Flights API
 dotenv.config();
 const app = express();
@@ -83,21 +87,27 @@ app.get("/search?", async (req, res) => {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//create configuration for MSSQL
-const configMssql = {
-  user: process.env.MSSQL_USER_NAME,
-  password: process.env.MSSQL_PASSWORD,
-  database: "BVC_Airlines_DB",
-  server: "localhost",
-  options: {
-    encrypt: false,
-    trustedconnection: true,
-    enableArithAbort: true,
-  },
-};
+//Open DB Connection
+    console.log("Connecting to database...");  
+   
+      const poolPromise = mssql.connect(configMssql)
+      .then(() => console.log("Database connected succesfully"))
+      .catch( err => console.error("Database Connection Error", err));    
+  
 
-const poolPromise = mssql.connect(configMssql);
+      // Read data from the JSON file
+app.get("/getcountries", async function (req, res) {
+  try {
+    const data = await readData();
+    /*  res.json(data); */
+    res.send(JSON.stringify(data));
+    console.log(data);
+  } catch (err) {
+    res.status(500).json({ error: "Error reading data" });
+  }
+});
 
+ 
 /* REST API */
 // Fetch data from tables
 app.get("/query/:table", async (req, res) => {
@@ -450,7 +460,7 @@ app.post("/register", async (req, res) => {
 //#endregion
 
 // Listen on port 5001
-const PORT = process.env.PORT || 5002;
+const PORT = process.env.APP_PORT;
 app.listen(PORT, () =>
   console.log(`Server running on http://localhost:${PORT}`)
 );

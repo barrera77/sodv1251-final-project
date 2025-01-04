@@ -1,11 +1,11 @@
-# Use the official Node.js image as a base
-FROM node:18
+# Use a Node.js image as the base
+FROM node:23
 
 # Set the working directory inside the container
 WORKDIR /app
 
 # Copy package.json and package-lock.json
-COPY package*.json ./
+COPY ["package.json", "package-lock.json*", "./"]
 
 # Install dependencies
 RUN npm install
@@ -13,8 +13,11 @@ RUN npm install
 # Copy the rest of your application code
 COPY . .
 
+# Rebuild bcrypt for the correct environment
+RUN npm rebuild bcrypt --build-from-source
+
 # Expose the port your app runs on
-EXPOSE 5002
+EXPOSE 5006
 
 # Command to run your app
 CMD ["npm", "run", "dev"]

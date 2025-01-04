@@ -22,13 +22,15 @@
   "version": "1.0.0",
   "type": "module",
   "description": "",
-  "main": "index.js",
   "devDependencies": {
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "parcel": "^2.13.3",
+    "svgo": "^3.3.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "Start": "node backend/server.js",
+    "build": "parcel build frontend/public/index.html --dist-dir frontend/dist",
     "dev": "nodemon backend/server.js"
   },
   "keywords": [],
