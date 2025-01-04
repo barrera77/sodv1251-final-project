@@ -90,9 +90,7 @@ const __dirname = path.dirname(__filename);
 //Open DB Connection
     console.log("Connecting to database...");  
    
-      const poolPromise = mssql.connect(configMssql)
-      .then(() => console.log("Database connected succesfully"))
-      .catch( err => console.error("Database Connection Error", err));    
+    const poolPromise = mssql.connect(configMssql);
   
 
       // Read data from the JSON file
