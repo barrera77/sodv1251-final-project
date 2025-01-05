@@ -45,6 +45,7 @@ The goal of this project is to create a simple airline ticket reservation page u
 
 - Deployment: I learned how to utilize Docker for application deployment, creating containerized environments to ensure consistency across different systems. This method simplified the deployment process and provided me with a great tool to improve the application’s flexibility and reliability.
 
+
 ## Conclusion
 
 Through this experience, I developed a solid foundation in full-stack development, from designing user interfaces to implementing back-end functionality and deploying applications. Each aspect of the project provided me with valuable insights and practical skills, reinforcing my understanding of modern web development practices.  Each skill contributed to my understanding of building scalable, maintainable, and user-friendly applications. The experience of working without frameworks, leveraging abstract classes for state management, and deploying with Docker has provided me with a strong foundation to deal with complex software development challenges.

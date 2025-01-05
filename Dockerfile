@@ -8,7 +8,7 @@ WORKDIR /app
 COPY ["package.json", "package-lock.json*", "./"]
 
 # Install dependencies
-RUN npm install
+RUN npm install --production
 
 # Copy the rest of your application code
 COPY . .
@@ -20,4 +20,5 @@ RUN npm rebuild bcrypt --build-from-source
 EXPOSE 5006
 
 # Command to run your app
-CMD ["npm", "run", "dev"]
+CMD ["node", "backend/server.js"]
+
